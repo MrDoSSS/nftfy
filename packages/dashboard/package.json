@@ -2,6 +2,7 @@
   "name": "@nftfy/dashboard",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "yarn@3.4.1",
   "type": "module",
   "scripts": {
     "dev": "vite",

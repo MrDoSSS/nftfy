@@ -1,6 +1,7 @@
 {
   "name": "@nftfy/mint",
   "private": true,
+  "packageManager": "yarn@3.4.1",
   "version": "0.0.0",
   "type": "module",
   "scripts": {

@@ -1,5 +1,6 @@
 {
   "name": "@nftfy/web3",
+  "version": "0.0.0",
   "packageManager": "yarn@3.4.1",
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
