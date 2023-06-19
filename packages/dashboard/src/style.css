@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  svg {
+    width: 1em;
+    height: 1em;
+  }
+}
+
+@layer utilities {
+  .font-title {
+    font-family: Figtree, Noto Sans JP, Noto Sans, sans-serif;
+  }
+}

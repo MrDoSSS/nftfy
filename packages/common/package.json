@@ -1,0 +1,19 @@
+{
+  "name": "@nftfy/common",
+  "packageManager": "yarn@3.4.1",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@wagmi/core": "^1.2.0",
+    "@web3modal/ethereum": "^2.4.7",
+    "@web3modal/html": "^2.4.7",
+    "firebase": "^9.22.2",
+    "viem": "^1.0.7",
+    "vue": "^3.2.47"
+  }
+}
