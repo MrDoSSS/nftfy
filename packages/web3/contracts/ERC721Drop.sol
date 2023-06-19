@@ -14,8 +14,7 @@ error TotalSupplyOverflow();
 error InvalidProof();
 
 struct MintRules {
-  uint64 totalSupply;
-  uint64 currentSupply;
+  uint64 supply;
   uint64 maxPerWallet;
   uint64 freePerWallet;
   uint256 price;
@@ -29,6 +28,7 @@ contract ERC721Drop is
 {
   MintRules public mintRules;
   string public baseTokenURI;
+  uint256 public maxTotalSupply;
 
   address[] private _withdrawAddresses;
   bytes32 private _root;
@@ -88,13 +88,17 @@ contract ERC721Drop is
   }
 
   function setMintRules(MintRules memory _mintRules) external onlyOwner {
-    if (_mintRules.currentSupply > _mintRules.totalSupply) revert();
+    if (_mintRules.supply > maxTotalSupply) revert();
 
     mintRules = _mintRules;
   }
 
+  function setMaxTotalSupply(uint256 _maxTotalSupply) external onlyOwner {
+    maxTotalSupply = _maxTotalSupply;
+  }
+
   function airdrop(address _to, uint256 _amount) external onlyOwner {
-    if (_totalMinted() + _amount > mintRules.totalSupply) {
+    if (_totalMinted() + _amount > maxTotalSupply) {
       revert TotalSupplyOverflow();
     }
 
@@ -158,7 +162,7 @@ contract ERC721Drop is
       revert MaxPerWalletOverflow();
     }
 
-    if (_totalMinted() + _amount > mintRules.currentSupply) {
+    if (_totalMinted() + _amount > mintRules.supply) {
       revert CurrentSupplyOverflow();
     }
   }

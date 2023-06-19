@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NDrawer from '@/components/NDrawer.vue'
+import TheDrawer from '@/components/TheDrawer.vue'
 import { onMounted, provide, ref, readonly } from 'vue'
 
 const mounted = ref(false)
@@ -10,7 +10,7 @@ onMounted(() => (mounted.value = true))
 </script>
 
 <template>
-  <NDrawer>
+  <TheDrawer>
     <RouterView />
-  </NDrawer>
+  </TheDrawer>
 </template>

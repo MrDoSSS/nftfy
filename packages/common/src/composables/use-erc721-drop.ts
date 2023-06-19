@@ -54,15 +54,17 @@ export const useErc721Drop = (contractAddress: `0x${string}`) => {
     writable('setBaseUri', { args: [uri] })
 
   const setMintRules = async (
-    totalSupply: bigint,
-    currentSupply: bigint,
+    supply: bigint,
     maxPerWallet: bigint,
     freePerWallet: bigint,
     price: bigint
   ) =>
     writable('setMintRules', {
-      args: [totalSupply, currentSupply, maxPerWallet, freePerWallet, price],
+      args: [supply, maxPerWallet, freePerWallet, price],
     })
+
+  const setMaxTotalSupply = async (totalSupply: bigint) =>
+    writable('setMaxTotalSupply', { args: [totalSupply] })
 
   const setRoot = (root: string) => writable('setRoot', { args: [root] })
 
@@ -86,6 +88,7 @@ export const useErc721Drop = (contractAddress: `0x${string}`) => {
     mint,
     setBaseUri,
     setMintRules,
+    setMaxTotalSupply,
     setRoot,
     airdrop,
     withdraw,

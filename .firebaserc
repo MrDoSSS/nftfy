@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "nftfy-5ac58"
+  },
+  "targets": {
+    "nftfy-5ac58": {
+      "hosting": {
+        "dashboard": [
+          "nftfy-5ac58"
+        ],
+        "mint": [
+          "nftfy-mint-66d7c"
+        ]
+      }
+    }
   }
 }

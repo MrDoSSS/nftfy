@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { inject } from 'vue'
-import {
-  RocketLaunchIcon,
-  Cog6ToothIcon,
-  AdjustmentsHorizontalIcon,
-  DocumentIcon,
-} from '@heroicons/vue/24/solid'
+import { RocketLaunchIcon, GlobeAltIcon } from '@heroicons/vue/24/solid'
 
 const layoutMounted = inject('layoutMounted')
 </script>
@@ -19,18 +14,8 @@ const layoutMounted = inject('layoutMounted')
         >
       </li>
       <li>
-        <RouterLink :to="{ name: 'project-mint-rules', params: { id: 1 } }"
-          ><AdjustmentsHorizontalIcon /> Mint rules</RouterLink
-        >
-      </li>
-      <li>
-        <RouterLink :to="{ name: 'project-whitelist', params: { id: 1 } }"
-          ><DocumentIcon /> Whitelist</RouterLink
-        >
-      </li>
-      <li>
-        <RouterLink :to="{ name: 'project-settings', params: { id: 1 } }"
-          ><Cog6ToothIcon /> Settings</RouterLink
+        <RouterLink :to="{ name: 'project-website', params: { id: 1 } }"
+          ><GlobeAltIcon /> Website</RouterLink
         >
       </li>
     </Teleport>

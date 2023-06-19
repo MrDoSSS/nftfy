@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NHeader from './NHeader.vue'
+import TheHeader from './TheHeader.vue'
 import NLogo from './NLogo.vue'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -13,14 +13,14 @@ const shown = computed<boolean>(
 
 <template>
   <div
-    class="drawer h-full"
+    class="drawer min-h-full"
     :class="{
       'xl:drawer-open': shown,
     }"
   >
     <input id="main-drawer" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content flex flex-col">
-      <NHeader :drawer-toggler="shown" />
+      <TheHeader :drawer-toggler="shown" />
       <div class="px-4 pb-16 pt-4 md:px-6">
         <slot />
       </div>
@@ -30,7 +30,7 @@ const shown = computed<boolean>(
 
       <aside class="bg-base-100 h-full w-72 py-4 lg:pt-0">
         <div
-          class="bg-base-100 sticky top-0 z-20 hidden h-16 items-center bg-opacity-90 px-2 pt-1 backdrop-blur lg:flex"
+          class="bg-base-100 sticky top-0 z-20 hidden h-16 items-center bg-opacity-90 px-2 pt-1 backdrop-blur xl:flex"
         >
           <NLogo class="hidden text-2xl md:text-4xl xl:block" />
         </div>

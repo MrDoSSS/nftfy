@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
-import { PlusIcon } from '@heroicons/vue/24/solid'
+import { PlusIcon, MinusIcon } from '@heroicons/vue/24/solid'
 import NButton from '@/components/NButton.vue'
-import DeployStatusModal from './DeployStatusModal.vue'
+import DeployStatusModal from '@/components/modals/DeployStatus.vue'
 
 const shown = ref(false)
 
@@ -29,6 +29,8 @@ const addPayee = () =>
     address: '',
     share: '',
   })
+
+const removePayee = (index: number) => data.payees.splice(index, 1)
 </script>
 
 <template>
@@ -91,18 +93,18 @@ const addPayee = () =>
               </p>
             </div>
             <div
-              class="payee mb-2 grid grid-flow-row-dense grid-cols-6 items-end gap-2 md:gap-4"
+              class="payee mb-2 grid grid-flow-row-dense grid-cols-9 items-end gap-2 md:gap-4"
               v-for="(item, i) in data.payees"
               :key="i"
             >
-              <div class="form-control col-span-3">
+              <div class="form-control col-span-6">
                 <label class="label">
                   <span class="label-text">Address</span>
                 </label>
                 <input
                   type="text"
                   class="input input-bordered bg-base-200 w-full"
-                  :required="i === 0"
+                  required
                   v-model="item.address"
                 />
               </div>
@@ -113,19 +115,26 @@ const addPayee = () =>
                 <input
                   type="text"
                   class="input input-bordered bg-base-200 w-full"
-                  :required="i === 0"
+                  required
                   v-model="item.share"
                 />
               </div>
               <button
                 type="button"
-                class="btn w-1/10 text-xl"
-                v-if="i === data.payees.length - 1"
+                class="btn p-0 text-xl"
+                v-if="i === 0"
                 @click="addPayee"
               >
                 <PlusIcon />
               </button>
-              <div v-else class="w-1/10"></div>
+              <button
+                type="button"
+                class="btn p-0 text-xl"
+                v-else
+                @click="removePayee(i)"
+              >
+                <MinusIcon />
+              </button>
             </div>
           </div>
           <NButton class="btn-primary btn-block mt-auto"

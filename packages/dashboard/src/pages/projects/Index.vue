@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PlusIcon } from '@heroicons/vue/24/solid'
 import { ref } from 'vue'
-import AddDrawer from '@/components/projects/AddDrawer.vue'
+import AddProjectDrawer from '@/components/drawers/AddProject.vue'
 
 const projects = ref([
   {
@@ -12,7 +12,7 @@ const projects = ref([
   },
 ])
 
-const addDrawerRef = ref<InstanceType<typeof AddDrawer>>()
+const addDrawerEl = ref<InstanceType<typeof AddProjectDrawer>>()
 </script>
 
 <template>
@@ -20,7 +20,7 @@ const addDrawerRef = ref<InstanceType<typeof AddDrawer>>()
     class="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3"
   >
     <div
-      @click="addDrawerRef?.show()"
+      @click="addDrawerEl?.show()"
       class="card bg-neutral cursor-pointer text-white shadow-xl transition-transform hover:scale-[1.01] hover:shadow-2xl"
     >
       <div class="card-body">
@@ -29,17 +29,14 @@ const addDrawerRef = ref<InstanceType<typeof AddDrawer>>()
     </div>
     <RouterLink
       :to="{ name: 'project', params: { id: project.id } }"
-      class="card bg-base-200 image-full shadow-xl transition-transform hover:scale-[1.01] hover:shadow-2xl"
+      class="card bg-base-200 h-[20vmax] max-h-[15rem] shadow-xl transition-transform hover:scale-[1.01] hover:shadow-2xl"
       v-for="project in projects"
       :key="project.id"
     >
-      <figure>
-        <img :src="project.image" />
-      </figure>
       <div class="card-body !text-white">
         <h2 class="card-title">{{ project.name }}</h2>
       </div>
     </RouterLink>
   </div>
-  <AddDrawer ref="addDrawerRef" />
+  <AddProjectDrawer ref="addDrawerEl" />
 </template>

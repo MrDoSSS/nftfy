@@ -5,6 +5,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "build:frontend": ""
+  },
   "devDependencies": {
     "@types/node": "^20.3.0",
     "@wagmi/cli": "^1.2.0",
