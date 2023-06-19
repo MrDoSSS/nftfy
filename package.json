@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build:frontend": ""
+    "build:frontend": "yarn workspace @nftfy/dashboard build && yarn workspace @nftfy/mint build"
   },
   "devDependencies": {
     "@types/node": "^20.3.0",
