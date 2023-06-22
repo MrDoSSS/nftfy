@@ -1,4 +1,4 @@
-import { web3modal } from '../web3-modal'
+import { web3Modal } from '../web3-modal'
 import { useAccount } from './use-account'
 import { ref, onUnmounted } from 'vue'
 
@@ -8,16 +8,16 @@ export const useWeb3Modal = () => {
 
   const connect = () => {
     return new Promise<boolean>((resolve) => {
-      web3modal.openModal()
+      web3Modal.openModal()
 
-      const unsubscribe = web3modal.subscribeModal(() => {
+      const unsubscribe = web3Modal.subscribeModal(() => {
         unsubscribe()
         resolve(account.value.isConnected)
       })
     })
   }
 
-  const unsubscribeModal = web3modal.subscribeModal(
+  const unsubscribeModal = web3Modal.subscribeModal(
     (state: { open: boolean }) => {
       opened.value = state.open
     }
@@ -25,5 +25,5 @@ export const useWeb3Modal = () => {
 
   onUnmounted(unsubscribeModal)
 
-  return { connect, web3modal, opened }
+  return { connect, web3Modal, opened }
 }

@@ -12,7 +12,7 @@ defineProps({ link: { type: Boolean, default: true } })
     <div
       class="font-title text-primary inline-flex transition-all duration-200"
     >
-      <span class="text-primary uppercase">721</span>
+      <span class="text-primary uppercase">NFT</span>
       <span class="text-base-content lowercase">fy</span>
     </div>
   </component>

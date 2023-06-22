@@ -1,8 +1,16 @@
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { PlusIcon, MinusIcon } from '@heroicons/vue/24/solid'
+import { useErc721Factory } from '@nftfy/common'
+import { decodeEventLog } from 'viem'
+import { useRouter } from 'vue-router'
+import { projects } from '@nftfy/common/collections'
+import { getNetwork } from '@wagmi/core'
+
 import NButton from '@/components/NButton.vue'
 import DeployStatusModal from '@/components/modals/DeployStatus.vue'
+
+const router = useRouter()
 
 const shown = ref(false)
 
@@ -12,6 +20,10 @@ const hide = () => (shown.value = false)
 const deployStatusModalEl = ref<InstanceType<typeof DeployStatusModal>>()
 
 defineExpose({ show, hide })
+
+const erc721Factory = useErc721Factory(
+  ref(import.meta.env.VITE_FACTORY_ADDRESS)
+)
 
 const data = reactive({
   name: '',
@@ -24,6 +36,11 @@ const data = reactive({
   ],
 })
 
+const payees = computed(() =>
+  data.payees.map((item) => item.address as `0x${string}`)
+)
+const shares = computed(() => data.payees.map((item) => BigInt(item.share)))
+
 const addPayee = () =>
   data.payees.push({
     address: '',
@@ -31,10 +48,67 @@ const addPayee = () =>
   })
 
 const removePayee = (index: number) => data.payees.splice(index, 1)
+
+const status = ref<'deploying' | 'creating'>('deploying')
+
+const deployContract = async () => {
+  status.value = 'deploying'
+  deployStatusModalEl.value?.show()
+  const { logs } = await erc721Factory.clone(
+    data.name,
+    data.symbol,
+    payees.value,
+    shares.value
+  )
+
+  const events = logs
+    .filter(
+      (log) =>
+        log.address.toLowerCase() ===
+        import.meta.env.VITE_FACTORY_ADDRESS.toLowerCase()
+    )
+    .map((log) =>
+      decodeEventLog({
+        abi: erc721Factory.abi,
+        data: log.data,
+        topics: log.topics,
+        strict: false,
+      })
+    )
+
+  const contractCreatedEvent = events.find(
+    (e) => e.eventName === 'ContractCreated'
+  )
+
+  if (!contractCreatedEvent) {
+    throw Error('ContractCreated event not found')
+  }
+
+  const { contractAddress } = contractCreatedEvent.args as {
+    contractAddress: `0x${string}`
+  }
+
+  addProject(contractAddress)
+}
+
+const addProject = async (contractAddress: `0x${string}`) => {
+  status.value = 'creating'
+
+  const { chain } = getNetwork()
+
+  const project = await projects.add({
+    contractAddress,
+    name: data.name,
+    symbol: data.symbol,
+    chainId: chain?.id,
+  })
+
+  router.push({ name: 'project', params: { id: project.id } })
+}
 </script>
 
 <template>
-  <DeployStatusModal status="deploying" ref="deployStatusModalEl" />
+  <DeployStatusModal :status="status" ref="deployStatusModalEl" />
   <div class="drawer drawer-end">
     <input type="checkbox" :checked="shown" class="drawer-toggle" />
     <div class="drawer-side z-50">
@@ -56,7 +130,7 @@ const removePayee = (index: number) => data.payees.splice(index, 1)
           </p>
         </div>
         <form
-          @submit.prevent="deployStatusModalEl?.show()"
+          @submit.prevent="deployContract"
           class="flex grow flex-col gap-10"
         >
           <div>
@@ -70,6 +144,7 @@ const removePayee = (index: number) => data.payees.splice(index, 1)
                   type="text"
                   class="input input-bordered bg-base-200 w-full"
                   required
+                  v-model="data.name"
                 />
               </div>
               <div class="form-control w-full">
@@ -80,6 +155,7 @@ const removePayee = (index: number) => data.payees.splice(index, 1)
                   type="text"
                   class="input input-bordered bg-base-200 w-full"
                   required
+                  v-model="data.symbol"
                 />
               </div>
             </div>

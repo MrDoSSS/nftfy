@@ -11,7 +11,6 @@ defineExpose({ show, hide })
 </script>
 
 <template>
-  <DeployStatusModal status="deploying" ref="deployStatusModalEl" />
   <div class="drawer drawer-end">
     <input type="checkbox" :checked="shown" class="drawer-toggle" />
     <div class="drawer-side z-50">

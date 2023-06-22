@@ -4,27 +4,53 @@ import {
   readContract,
   writeContract,
   waitForTransaction,
+  getAccount,
 } from '@wagmi/core'
 import { SimulateContractParameters, ReadContractParameters } from 'viem'
+import { Ref, ComputedRef, provide, InjectionKey } from 'vue'
+import { fetchBalance, FetchBalanceResult, getPublicClient } from '@wagmi/core'
 
-export const useErc721Drop = (contractAddress: `0x${string}`) => {
-  const contractConfig = {
-    address: contractAddress,
-    abi: erc721DropABI,
-  }
+export interface Statistics {
+  maxTotalSupply: bigint
+  totalMinted: bigint
+  balance?: FetchBalanceResult
+  tokensLeft: bigint
+  pending: boolean
+}
 
+export interface MintRules {
+  supply: bigint
+  maxPerWallet: bigint
+  freePerWallet: bigint
+  price: bigint
+}
+
+export const injectKey: InjectionKey<ReturnType<typeof useErc721Drop>> =
+  Symbol()
+
+export const useErc721Drop = (
+  contractAddress:
+    | Ref<`0x${string}` | undefined>
+    | ComputedRef<`0x${string}` | undefined>,
+  chainId?: Ref<number | undefined> | ComputedRef<number | undefined>
+) => {
   const readable = <T = unknown>(
     functionName: string,
     params: Omit<
       ReadContractParameters,
       'address' | 'abi' | 'functionName'
     > = {}
-  ) =>
-    readContract({
-      ...contractConfig,
+  ) => {
+    if (!contractAddress.value) return
+
+    return readContract({
       ...params,
+      address: contractAddress.value,
+      abi: erc721DropABI,
+      chainId: chainId?.value,
       functionName,
     }) as Promise<T>
+  }
 
   const writable = async (
     functionName: string,
@@ -33,10 +59,26 @@ export const useErc721Drop = (contractAddress: `0x${string}`) => {
       'address' | 'abi' | 'functionName'
     > = {}
   ) => {
-    const { request } = await prepareWriteContract({
-      ...contractConfig,
+    if (!contractAddress.value) return
+
+    const publicClient = getPublicClient({ chainId: chainId?.value })
+    const account = getAccount()
+
+    const gas = await publicClient.estimateContractGas({
       ...params,
+      address: contractAddress.value,
+      abi: erc721DropABI,
       functionName,
+      account: account.address!,
+    })
+
+    const { request } = await prepareWriteContract({
+      ...params,
+      address: contractAddress.value,
+      abi: erc721DropABI,
+      chainId: chainId?.value,
+      functionName,
+      gas,
     })
     const { hash } = await writeContract(request)
     const data = await waitForTransaction({ hash })
@@ -53,14 +95,9 @@ export const useErc721Drop = (contractAddress: `0x${string}`) => {
   const setBaseUri = async (uri: string) =>
     writable('setBaseUri', { args: [uri] })
 
-  const setMintRules = async (
-    supply: bigint,
-    maxPerWallet: bigint,
-    freePerWallet: bigint,
-    price: bigint
-  ) =>
+  const setMintRules = async (mintRules: MintRules) =>
     writable('setMintRules', {
-      args: [supply, maxPerWallet, freePerWallet, price],
+      args: [mintRules],
     })
 
   const setMaxTotalSupply = async (totalSupply: bigint) =>
@@ -73,7 +110,10 @@ export const useErc721Drop = (contractAddress: `0x${string}`) => {
 
   const withdraw = () => writable('withdraw')
 
+  const baseTokenURI = () => readable<string>('baseTokenURI')
   const totalMinted = () => readable<bigint>('totalMinted')
+  const totalSupply = () => readable<bigint>('totalSupply')
+  const maxTotalSupply = () => readable<bigint>('maxTotalSupply')
   const numberMinted = (address: `0x${string}`) =>
     readable<bigint>('numberMinted', { args: [address] })
   const nonFreeAmount = (
@@ -82,9 +122,47 @@ export const useErc721Drop = (contractAddress: `0x${string}`) => {
     freeAmount: bigint
   ) =>
     readable<bigint>('nonFreeAmount', { args: [address, amount, freeAmount] })
-  const mintRules = () => readable('mintRules')
+  const mintRules = async () => {
+    const [supply, maxPerWallet, freePerWallet, price] = await readable<
+      [bigint, bigint, bigint, bigint]
+    >('mintRules')!
+    return {
+      supply,
+      maxPerWallet,
+      freePerWallet,
+      price,
+    }
+  }
 
-  return {
+  const balance = () => {
+    if (contractAddress.value) {
+      return fetchBalance({
+        address: contractAddress.value,
+        chainId: chainId?.value,
+      })
+    }
+  }
+
+  const statistics = async () => {
+    const data: Statistics = {
+      maxTotalSupply: 0n,
+      totalMinted: 0n,
+      get tokensLeft() {
+        return this.maxTotalSupply - this.totalMinted
+      },
+      pending: true,
+    }
+
+    await Promise.all([
+      maxTotalSupply()?.then((v) => (data.maxTotalSupply = v)),
+      totalMinted()?.then((v) => (data.totalMinted = v)),
+      balance()?.then((v) => (data.balance = v)),
+    ]).finally(() => (data.pending = false))
+
+    return data
+  }
+
+  const methods = {
     mint,
     setBaseUri,
     setMintRules,
@@ -92,9 +170,19 @@ export const useErc721Drop = (contractAddress: `0x${string}`) => {
     setRoot,
     airdrop,
     withdraw,
+    baseTokenURI,
     mintRules,
+    maxTotalSupply,
     totalMinted,
+    totalSupply,
     numberMinted,
     nonFreeAmount,
+    balance,
+    statistics,
+    abi: erc721DropABI,
   }
+
+  provide(injectKey, methods)
+
+  return methods
 }

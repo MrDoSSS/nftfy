@@ -1,20 +1,29 @@
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
 import { Web3Modal } from '@web3modal/html'
+import { ThemeCtrlState } from '@web3modal/core'
 import { configureChains, createConfig } from '@wagmi/core'
-import { goerli } from '@wagmi/core/chains'
+import { Chain } from '@wagmi/core/chains'
+import { publicProvider } from '@wagmi/core/providers/public'
 
-const chains = [goerli]
-const projectId = '6d14a9384efee5a229414069f0a565ca'
+export let web3Modal: Web3Modal
 
-export const provider = w3mProvider({ projectId })
+export const initWeb3Modal = (
+  projectId: string,
+  chains: Chain[],
+  theme: ThemeCtrlState = {}
+) => {
+  const { publicClient } = configureChains(chains, [
+    w3mProvider({ projectId }),
+    publicProvider(),
+  ])
+  const wagmiConfig = createConfig({
+    autoConnect: true,
+    connectors: w3mConnectors({ projectId, version: 1, chains }),
+    publicClient,
+  })
 
-const { publicClient } = configureChains(chains, [w3mProvider({ projectId })])
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors: w3mConnectors({ projectId, version: 1, chains }),
-  publicClient,
-})
+  const ethereumClient = new EthereumClient(wagmiConfig, chains)
 
-const ethereumClient = new EthereumClient(wagmiConfig, chains)
-
-export const web3modal = new Web3Modal({ projectId }, ethereumClient)
+  web3Modal = new Web3Modal({ projectId }, ethereumClient)
+  web3Modal.setTheme(theme)
+}

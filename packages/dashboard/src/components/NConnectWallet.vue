@@ -3,11 +3,11 @@ import { useAccount, useWeb3Modal } from '@nftfy/common'
 import NButton from './NButton.vue'
 
 const { account, slicedAddress } = useAccount()
-const { connect, web3modal, opened } = useWeb3Modal()
+const { connect, web3Modal, opened } = useWeb3Modal()
 
 const action = () => {
   if (account.value.isConnected) {
-    web3modal.openModal()
+    web3Modal.openModal()
   } else {
     connect()
   }

@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import { PlusIcon } from '@heroicons/vue/24/solid'
 import { ref } from 'vue'
+import { projects } from '@nftfy/common/collections'
+import { useCollection } from 'vuefire'
 import AddProjectDrawer from '@/components/drawers/AddProject.vue'
-
-const projects = ref([
-  {
-    id: 1,
-    name: 'Project 1',
-    image:
-      'https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg',
-  },
-])
+import { sliceAddress } from '@nftfy/common'
 
 const addDrawerEl = ref<InstanceType<typeof AddProjectDrawer>>()
+
+const items = useCollection(projects.collectionRef)
+const loading = items.pending
 </script>
 
 <template>
@@ -21,7 +18,7 @@ const addDrawerEl = ref<InstanceType<typeof AddProjectDrawer>>()
   >
     <div
       @click="addDrawerEl?.show()"
-      class="card bg-neutral cursor-pointer text-white shadow-xl transition-transform hover:scale-[1.01] hover:shadow-2xl"
+      class="card bg-neutral h-[20vmax] max-h-[15rem] cursor-pointer text-white shadow-xl transition-transform hover:scale-[1.01] hover:shadow-2xl"
     >
       <div class="card-body">
         <PlusIcon class="mx-auto w-28 grow" />
@@ -30,13 +27,35 @@ const addDrawerEl = ref<InstanceType<typeof AddProjectDrawer>>()
     <RouterLink
       :to="{ name: 'project', params: { id: project.id } }"
       class="card bg-base-200 h-[20vmax] max-h-[15rem] shadow-xl transition-transform hover:scale-[1.01] hover:shadow-2xl"
-      v-for="project in projects"
+      v-for="project in items"
       :key="project.id"
     >
-      <div class="card-body !text-white">
-        <h2 class="card-title">{{ project.name }}</h2>
+      <div class="card-body flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <h2 class="card-title">{{ project.name }} ({{ project.symbol }})</h2>
+          <div class="badge badge-primary">{{ project.chain?.name }}</div>
+        </div>
+
+        <div class="text-base-content/80">
+          {{ sliceAddress(project.contractAddress, 6) }}
+        </div>
       </div>
     </RouterLink>
+    <template v-if="loading">
+      <div
+        class="card bg-base-200 h-[20vmax] max-h-[15rem] shadow-xl"
+        v-for="i in 2"
+        :key="i"
+      >
+        <div class="card-body animate-pulse flex-col justify-between">
+          <div class="mb-4 flex items-center justify-between">
+            <div class="bg-neutral h-5 w-1/2 rounded-full"></div>
+            <div class="bg-primary h-5 w-1/3 rounded-full"></div>
+          </div>
+          <div class="bg-neutral h-4 w-1/2 rounded-full"></div>
+        </div>
+      </div>
+    </template>
   </div>
   <AddProjectDrawer ref="addDrawerEl" />
 </template>

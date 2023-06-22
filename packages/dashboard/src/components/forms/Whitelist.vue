@@ -7,7 +7,7 @@
         required
         rows="20"
       />
-      <button class="btn btn-primary btn-block md:w-48">Save</button>
+      <button class="btn btn-primary btn-block btn-sm md:w-auto">Save</button>
     </form>
   </details>
 </template>

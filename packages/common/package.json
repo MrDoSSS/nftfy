@@ -7,6 +7,9 @@
   "exports": {
     ".": {
       "import": "./src/index.ts"
+    },
+    "./collections": {
+      "import": "./src/firebase/collections.ts"
     }
   },
   "peerDependencies": {
@@ -15,6 +18,7 @@
     "@web3modal/html": "^2.4.7",
     "firebase": "^9.22.2",
     "viem": "^1.0.7",
-    "vue": "^3.2.47"
+    "vue": "^3.2.47",
+    "vuefire": "^3.1.0"
   }
 }

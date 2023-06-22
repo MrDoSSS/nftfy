@@ -26,9 +26,9 @@ contract ERC721Drop is
   OwnableUpgradeable,
   DefaultOperatorFiltererUpgradeable
 {
-  MintRules public mintRules;
   string public baseTokenURI;
   uint256 public maxTotalSupply;
+  MintRules public mintRules;
 
   address[] private _withdrawAddresses;
   bytes32 private _root;
@@ -66,6 +66,17 @@ contract ERC721Drop is
     return _calculateNonFreeAmount(_owner, _amount, _freeAmount);
   }
 
+  // function mintRules()
+  //   external
+  //   view
+  //   returns (uint64 _supply, uint64 _maxPerWallet, uint64 _freePerWallet, uint256 _price)
+  // {
+  //   _supply = mintRules.supply;
+  //   _maxPerWallet = mintRules.maxPerWallet;
+  //   _freePerWallet = mintRules.freePerWallet;
+  //   _price = mintRules.price;
+  // }
+
   /*//////////////////////////////////////////////////////////////
                          Minting functions
   //////////////////////////////////////////////////////////////*/
@@ -88,7 +99,7 @@ contract ERC721Drop is
   }
 
   function setMintRules(MintRules memory _mintRules) external onlyOwner {
-    if (_mintRules.supply > maxTotalSupply) revert();
+    if (_totalMinted() + _mintRules.supply > maxTotalSupply) revert();
 
     mintRules = _mintRules;
   }
@@ -111,10 +122,10 @@ contract ERC721Drop is
 
   function withdraw() external onlyOwner {
     for (uint256 i = 0; i < _withdrawAddresses.length; ) {
-      address payable withdrawAddress = payable(_withdrawAddresses[i]);
+      address payable _withdrawAddress = payable(_withdrawAddresses[i]);
 
-      if (releasable(withdrawAddress) > 0) {
-        release(withdrawAddress);
+      if (releasable(_withdrawAddress) > 0) {
+        release(_withdrawAddress);
       }
 
       unchecked {

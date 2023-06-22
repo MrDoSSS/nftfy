@@ -6,13 +6,14 @@ import {
   waitForTransaction,
 } from '@wagmi/core'
 import { SimulateContractParameters, ReadContractParameters } from 'viem'
+import { Ref, ComputedRef } from 'vue'
 
-export const useErc721Factory = (contractAddress: `0x${string}`) => {
-  const contractConfig = {
-    address: contractAddress,
-    abi: erc721FactoryABI,
-  }
-
+export const useErc721Factory = (
+  contractAddress:
+    | Ref<`0x${string | undefined}`>
+    | ComputedRef<`0x${string | undefined}`>,
+  chainId?: Ref<number | undefined> | ComputedRef<number | undefined>
+) => {
   const readable = <T = unknown>(
     functionName: string,
     params: Omit<
@@ -21,8 +22,10 @@ export const useErc721Factory = (contractAddress: `0x${string}`) => {
     > = {}
   ) =>
     readContract({
-      ...contractConfig,
       ...params,
+      address: contractAddress.value,
+      abi: erc721FactoryABI,
+      chainId: chainId?.value,
       functionName,
     }) as Promise<T>
 
@@ -34,8 +37,10 @@ export const useErc721Factory = (contractAddress: `0x${string}`) => {
     > = {}
   ) => {
     const { request } = await prepareWriteContract({
-      ...contractConfig,
       ...params,
+      address: contractAddress.value,
+      abi: erc721FactoryABI,
+      chainId: chainId?.value,
       functionName,
     })
     const { hash } = await writeContract(request)
@@ -58,5 +63,6 @@ export const useErc721Factory = (contractAddress: `0x${string}`) => {
   return {
     implementation,
     clone,
+    abi: erc721FactoryABI,
   }
 }

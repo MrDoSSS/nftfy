@@ -3,7 +3,11 @@ import typography from '@tailwindcss/typography'
 import daisyui from 'daisyui'
 
 export default {
-  content: ['./index.html', './src/**/*.{vue,ts}'],
+  content: [
+    './index.html',
+    './src/**/*.{vue,ts}',
+    '../common/src/**/*.{vue,ts}',
+  ],
   theme: {
     extend: {
       colors: {},
