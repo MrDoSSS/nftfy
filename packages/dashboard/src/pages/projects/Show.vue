@@ -7,31 +7,25 @@ import WhitelistForm from '@/components/forms/Whitelist.vue'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/solid'
 import { Square2StackIcon, TrashIcon } from '@heroicons/vue/24/outline'
 
-import { ref, computed } from 'vue'
-import { useDocument } from 'vuefire'
-import { projects } from '@nftfy/common/collections'
-import { useRoute, useRouter } from 'vue-router'
-import { useErc721Drop, Statistics } from '@nftfy/common'
+import { ref, inject } from 'vue'
+import { _RefFirestore } from 'vuefire'
+import { projects, Project } from '@nftfy/common/collections'
+import { useRouter } from 'vue-router'
+import { useErc721Drop } from '@nftfy/common'
 import { sliceAddress } from '@nftfy/common'
 
 const router = useRouter()
-const route = useRoute()
 
-const doc = ref(projects.docRef(route.params.id as string))
+const project = inject<_RefFirestore<Project>>('project')!
 
-const project = useDocument(doc)
-const loading = project.pending
-
-const contractAddress = computed(() => project.value?.contractAddress)
-const chainId = computed(() => project.value?.chainId)
-
-const erc721Drop = useErc721Drop(contractAddress, chainId)
-
-const statistics = ref<Statistics>({ pending: true } as Statistics)
-
-project.promise.value.then(async () => {
-  erc721Drop.statistics()?.then((v) => (statistics.value = v))
+const erc721Drop = useErc721Drop({
+  address: project.value.contractAddress,
+  chainId: project.value.chainId,
 })
+
+const maxTotalSupply = erc721Drop.maxTotalSupply()
+const totalMinted = erc721Drop.totalMinted()
+const balance = erc721Drop.balance()
 
 const copyAddress = async () => {
   if (!project.value?.contractAddress) return
@@ -46,7 +40,9 @@ const copyAddress = async () => {
 const copyTooltip = ref('Copy to clipboard')
 
 const deleteProject = async () => {
-  await projects.delete(doc.value.id)
+  if (!project.value) return
+
+  await projects.delete(project.value.id!)
 
   router.replace({ name: 'projects' })
 }
@@ -91,18 +87,18 @@ const deleteProject = async () => {
       <div class="stats bg-secondary text-secondary-content w-full">
         <div class="stat">
           <div class="stat-title text-secondary-content">Contract Balance</div>
-          <template v-if="statistics?.balance">
+          <template v-if="balance.pending">
+            <div class="loading loading-spinner loading-lg mt-3"></div>
+          </template>
+          <template v-else>
             <div class="stat-value text-secondary-content">
-              {{ statistics.balance.formatted }} {{ statistics.balance.symbol }}
+              {{ balance.value!.formatted }} {{ balance.value!.symbol }}
             </div>
             <div class="stat-actions">
-              <button class="btn btn-sm" :disabled="!statistics.balance.value">
+              <button class="btn btn-sm" :disabled="!balance.value!.value">
                 Withdraw
               </button>
             </div>
-          </template>
-          <template v-else>
-            <div class="loading loading-spinner loading-lg mt-3"></div>
           </template>
         </div>
       </div>
@@ -113,32 +109,35 @@ const deleteProject = async () => {
         <div class="stat">
           <div class="stat-title">Max Total Supply</div>
           <span
-            v-if="statistics.pending"
+            v-if="maxTotalSupply.pending"
             class="loading loading-spinner loading-lg mt-3"
           ></span>
           <div class="stat-value" v-else>
-            {{ statistics.maxTotalSupply }}
+            {{ maxTotalSupply.value }}
           </div>
         </div>
         <div class="stat">
           <div class="stat-title">Total Minted</div>
           <span
-            v-if="statistics.pending"
+            v-if="totalMinted.pending"
             class="loading loading-spinner loading-lg mt-3"
           ></span>
           <div class="stat-value" v-else>
-            {{ statistics.totalMinted }}
+            {{ totalMinted.value }}
           </div>
         </div>
 
         <div class="stat">
           <div class="stat-title">Tokens Left</div>
           <span
-            v-if="statistics.pending"
+            v-if="maxTotalSupply.pending || totalMinted.pending"
             class="loading loading-spinner loading-lg mt-3"
           ></span>
-          <div class="stat-value" v-else>
-            {{ statistics.tokensLeft }}
+          <div
+            class="stat-value"
+            v-else-if="maxTotalSupply.value && totalMinted.value"
+          >
+            {{ maxTotalSupply.value - totalMinted.value }}
           </div>
         </div>
       </div>
@@ -151,23 +150,6 @@ const deleteProject = async () => {
       <WhitelistForm />
     </div>
   </template>
-  <div v-else-if="loading" class="animate-pulse">
-    <div class="bg-neutral mb-4 h-7 w-1/2 rounded-full"></div>
-    <div class="bg-neutral mb-8 h-4 w-36 rounded-full md:mb-14"></div>
-    <div class="mb-4 flex w-full flex-col gap-4 md:mb-6 md:flex-row md:gap-6">
-      <div
-        class="stats bg-secondary text-secondary-content h-28 min-w-[20rem] shrink-0"
-      >
-        <div class="stat"></div>
-      </div>
-
-      <div
-        class="stats stats-vertical md:stats-horizontal bg-base-200 h-28 grow shadow"
-      >
-        <div class="stat"></div>
-      </div>
-    </div>
-  </div>
   <div v-else>
     <h1>Project not found</h1>
   </div>

@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
-import { injectKey } from '@nftfy/common'
+import { ref, inject } from 'vue'
+import { useMaxTotalSupply, useSetMaxTotalSupply } from '@nftfy/common'
 import NButton from '@/components/NButton.vue'
-
-const erc721Drop = inject(injectKey)
+import { _RefFirestore } from 'vuefire'
+import { Project } from '@nftfy/common/collections'
 
 const pending = ref(false)
 
-const maxTotalSupply = ref(0n)
+const project = inject<_RefFirestore<Project>>('project')!
 
-erc721Drop?.maxTotalSupply()?.then((v) => (maxTotalSupply.value = v))
+const maxTotalSupply = useMaxTotalSupply({
+  address: project.value.contractAddress,
+  chainId: project.value.chainId,
+})
+const setMaxTotalSupply = useSetMaxTotalSupply()
 
 const save = async () => {
+  if (!maxTotalSupply.value) return
+
   try {
     pending.value = true
-    await erc721Drop?.setMaxTotalSupply(maxTotalSupply.value)
+    await setMaxTotalSupply({ args: [maxTotalSupply.value] })
   } catch (e) {
     console.error(e)
   } finally {
@@ -34,7 +40,7 @@ const save = async () => {
           type="text"
           class="input input-bordered bg-neutral w-full"
           required
-          v-model="maxTotalSupply"
+          v-model="maxTotalSupply.value"
         />
       </div>
       <NButton class="btn-primary btn-block btn-sm md:w-auto" :loading="pending"

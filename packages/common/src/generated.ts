@@ -656,7 +656,7 @@ export const erc721DropABI = [
     outputs: [],
   },
   { stateMutability: 'payable', type: 'receive' },
-]
+] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ERC721Factory
@@ -742,7 +742,7 @@ export const erc721FactoryABI = [
     name: 'transferOwnership',
     outputs: [],
   },
-]
+] as const
 
 export const erc721FactoryAddress = '0xA8b3A287c3BBF5B282C1CAe005ea7B3838779ff5'
 

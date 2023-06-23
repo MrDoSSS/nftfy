@@ -20,13 +20,19 @@ const routes: Array<RouteRecordRaw> = [
         children: [
           {
             path: '',
-            name: 'project',
-            component: () => import('@/pages/projects/Show.vue'),
-          },
-          {
-            path: 'website',
-            name: 'project-website',
-            component: () => import('@/pages/projects/Website.vue'),
+            component: () => import('@/layouts/ProjectLoader.vue'),
+            children: [
+              {
+                path: '',
+                name: 'project',
+                component: () => import('@/pages/projects/Show.vue'),
+              },
+              {
+                path: 'website',
+                name: 'project-website',
+                component: () => import('@/pages/projects/Website.vue'),
+              },
+            ],
           },
         ],
       },

@@ -66,17 +66,6 @@ contract ERC721Drop is
     return _calculateNonFreeAmount(_owner, _amount, _freeAmount);
   }
 
-  // function mintRules()
-  //   external
-  //   view
-  //   returns (uint64 _supply, uint64 _maxPerWallet, uint64 _freePerWallet, uint256 _price)
-  // {
-  //   _supply = mintRules.supply;
-  //   _maxPerWallet = mintRules.maxPerWallet;
-  //   _freePerWallet = mintRules.freePerWallet;
-  //   _price = mintRules.price;
-  // }
-
   /*//////////////////////////////////////////////////////////////
                          Minting functions
   //////////////////////////////////////////////////////////////*/

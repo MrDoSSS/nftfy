@@ -1,36 +1,40 @@
 <script setup lang="ts">
-import { inject, ref, computed } from 'vue'
-import { MintRules, injectKey } from '@nftfy/common'
+import { ref, computed, inject } from 'vue'
+import { useMintRules, useSetMintRules } from '@nftfy/common'
 import { parseEther, formatEther } from 'viem'
 
 import NButton from '@/components/NButton.vue'
 
-const erc721Drop = inject(injectKey)
+import { _RefFirestore } from 'vuefire'
+import { Project } from '@nftfy/common/collections'
 
 const pending = ref(false)
-const data = ref<MintRules>()
 
-erc721Drop?.mintRules().then((v) => (data.value = v))
+const project = inject<_RefFirestore<Project>>('project')!
+
+const mintRules = useMintRules({
+  address: project.value.contractAddress,
+  chainId: project.value.chainId,
+})
+const setMintRules = useSetMintRules()
 
 const price = computed<string>({
   get() {
-    if (!data.value) return '0'
-
-    return formatEther(data.value.price)
+    return formatEther(mintRules.value?.price || 0n)
   },
   set(v: string) {
-    if (!data.value) return
+    if (!mintRules.value) return
 
-    data.value.price = parseEther(`${parseFloat(v)}`)
+    mintRules.value.price = parseEther(`${parseFloat(v)}`)
   },
 })
 
 const save = async () => {
-  if (!data.value) return
+  if (!mintRules.value) return
 
   try {
     pending.value = true
-    await erc721Drop?.setMintRules(data.value)
+    await setMintRules({ args: [mintRules.value] })
   } catch (e) {
     console.error(e)
   } finally {
@@ -43,7 +47,7 @@ const save = async () => {
   <details class="bg-base-200 collapse-arrow collapse shadow-xl">
     <summary class="collapse-title text-xl font-medium">Mint rules</summary>
     <form @submit.prevent="save" class="collapse-content">
-      <div class="mb-3 grid grid-cols-1 gap-3" v-if="data">
+      <div class="mb-3 grid grid-cols-1 gap-3">
         <div class="form-control w-full">
           <label class="label">
             <span class="label-text">Supply</span>
@@ -52,7 +56,7 @@ const save = async () => {
             type="text"
             class="input input-bordered bg-neutral w-full"
             required
-            v-model="data.supply"
+            v-model="mintRules.value?.supply"
           />
         </div>
         <div class="form-control w-full">
@@ -63,7 +67,7 @@ const save = async () => {
             type="text"
             class="input input-bordered bg-neutral w-full"
             required
-            v-model="data.maxPerWallet"
+            v-model="mintRules.value?.maxPerWallet"
           />
         </div>
         <div class="form-control w-full">
@@ -74,7 +78,7 @@ const save = async () => {
             type="text"
             class="input input-bordered bg-neutral w-full"
             required
-            v-model="data.freePerWallet"
+            v-model="mintRules.value?.freePerWallet"
           />
         </div>
         <div class="form-control w-full">

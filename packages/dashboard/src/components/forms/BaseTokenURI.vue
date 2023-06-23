@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
-import { injectKey } from '@nftfy/common'
+import { ref, inject } from 'vue'
+import { useBaseTokenURI, useSetBaseURI } from '@nftfy/common'
 import NButton from '@/components/NButton.vue'
-
-const erc721Drop = inject(injectKey)
+import { _RefFirestore } from 'vuefire'
+import { Project } from '@nftfy/common/collections'
 
 const pending = ref(false)
 
-const baseTokenURI = ref('')
+const project = inject<_RefFirestore<Project>>('project')!
 
-erc721Drop?.baseTokenURI()?.then((v) => (baseTokenURI.value = v))
+const baseTokenURI = useBaseTokenURI({
+  address: project.value.contractAddress,
+  chainId: project.value.chainId,
+})
+const setBaseURI = useSetBaseURI()
 
 const save = async () => {
+  if (!baseTokenURI.value) return
+
   try {
     pending.value = true
-    await erc721Drop?.setBaseUri(baseTokenURI.value)
+    await setBaseURI({ args: [baseTokenURI.value] })
   } catch (e) {
     console.error(e)
   } finally {
@@ -32,7 +38,7 @@ const save = async () => {
           type="text"
           class="input input-bordered bg-neutral w-full"
           required
-          v-model="baseTokenURI"
+          v-model="baseTokenURI.value"
         />
       </div>
       <div class="card-actions justify-start">
