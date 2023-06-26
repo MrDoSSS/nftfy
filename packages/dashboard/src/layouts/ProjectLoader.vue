@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { ref, provide } from 'vue'
-import { useDocument } from 'vuefire'
 import { projects } from '@nftfy/common/collections'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { ProjectKey } from '@/di-keys'
 
 const route = useRoute()
+const router = useRouter()
 
-const doc = ref(projects.docRef(route.params.id as string))
+const project = ref(await projects.get(route.params.id as string))
 
-const project = useDocument(doc)
-
-await project.promise.value
-
-provide('project', project)
+if (!project.value) {
+  router.replace({ name: 'projects' })
+} else {
+  provide(ProjectKey, project.value)
+}
 </script>
 
 <template>

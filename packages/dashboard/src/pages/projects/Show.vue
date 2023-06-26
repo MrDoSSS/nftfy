@@ -7,30 +7,33 @@ import WhitelistForm from '@/components/forms/Whitelist.vue'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/solid'
 import { Square2StackIcon, TrashIcon } from '@heroicons/vue/24/outline'
 
-import { ref, inject } from 'vue'
-import { _RefFirestore } from 'vuefire'
-import { projects, Project } from '@nftfy/common/collections'
+import { ref, provide } from 'vue'
+import { projects } from '@nftfy/common/collections'
 import { useRouter } from 'vue-router'
 import { useErc721Drop } from '@nftfy/common'
 import { sliceAddress } from '@nftfy/common'
+import { ProjectKey, ERC721DropKey } from '@/di-keys'
+import { injectStrict } from '@/utils'
 
 const router = useRouter()
 
-const project = inject<_RefFirestore<Project>>('project')!
+const project = injectStrict(ProjectKey)
 
 const erc721Drop = useErc721Drop({
-  address: project.value.contractAddress,
-  chainId: project.value.chainId,
+  address: project.contractAddress,
+  chainId: project.chainId,
 })
 
-const maxTotalSupply = erc721Drop.maxTotalSupply()
-const totalMinted = erc721Drop.totalMinted()
-const balance = erc721Drop.balance()
+provide(ERC721DropKey, erc721Drop)
+
+const maxTotalSupply = erc721Drop.maxTotalSupply({ watch: true })
+const totalMinted = erc721Drop.totalMinted({ watch: true })
+const balance = erc721Drop.balance({ watch: true })
 
 const copyAddress = async () => {
-  if (!project.value?.contractAddress) return
+  if (!project?.contractAddress) return
 
-  await navigator.clipboard.writeText(project.value.contractAddress)
+  await navigator.clipboard.writeText(project.contractAddress)
 
   copyTooltip.value = 'Copied'
 
@@ -40,9 +43,9 @@ const copyAddress = async () => {
 const copyTooltip = ref('Copy to clipboard')
 
 const deleteProject = async () => {
-  if (!project.value) return
+  if (!project) return
 
-  await projects.delete(project.value.id!)
+  await projects.delete(project.id)
 
   router.replace({ name: 'projects' })
 }
@@ -133,11 +136,8 @@ const deleteProject = async () => {
             v-if="maxTotalSupply.pending || totalMinted.pending"
             class="loading loading-spinner loading-lg mt-3"
           ></span>
-          <div
-            class="stat-value"
-            v-else-if="maxTotalSupply.value && totalMinted.value"
-          >
-            {{ maxTotalSupply.value - totalMinted.value }}
+          <div class="stat-value" v-else>
+            {{ maxTotalSupply.value! - totalMinted.value! }}
           </div>
         </div>
       </div>

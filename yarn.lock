@@ -1622,7 +1622,6 @@ __metadata:
     firebase: ^9.22.2
     viem: ^1.0.7
     vue: ^3.2.47
-    vuefire: ^3.1.0
   languageName: unknown
   linkType: soft
 
@@ -1648,7 +1647,6 @@ __metadata:
     vue: ^3.2.47
     vue-router: ^4.2.2
     vue-tsc: ^1.4.2
-    vuefire: ^3.1.0
   languageName: unknown
   linkType: soft
 
@@ -1669,7 +1667,6 @@ __metadata:
     vite: ^4.3.9
     vue: ^3.2.47
     vue-tsc: ^1.4.2
-    vuefire: ^3.1.0
   languageName: unknown
   linkType: soft
 
@@ -13030,7 +13027,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-demi@npm:>=0.14.5, vue-demi@npm:latest":
+"vue-demi@npm:>=0.14.5":
   version: 0.14.5
   resolution: "vue-demi@npm:0.14.5"
   peerDependencies:
@@ -13093,23 +13090,6 @@ __metadata:
     "@vue/server-renderer": 3.3.4
     "@vue/shared": 3.3.4
   checksum: 58b6c62a66a375ce5df460fcb7ba41b37c8637c635faf06ef472ae4197f412cf9ad83586cd8e3f66c486404fbe8550e694f90ff724a571d1ba78830791099c59
-  languageName: node
-  linkType: hard
-
-"vuefire@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "vuefire@npm:3.1.0"
-  dependencies:
-    vue-demi: latest
-  peerDependencies:
-    firebase: ^9.0.0
-    vue: ^2.7.0 || ^3.2.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-    firebase:
-      optional: true
-  checksum: d13ec4ae8b8826fc9f2018be1c94b4234b86e07b3afe48540026e3335e501adcb6c2e3304e94f223c7b1299cd1d6d4778c851e5771ffd1be3ed836c357cb1227
   languageName: node
   linkType: hard
 

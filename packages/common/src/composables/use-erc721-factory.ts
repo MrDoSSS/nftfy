@@ -1,3 +1,4 @@
+import { ReadContractConfig } from '@wagmi/core'
 import { erc721FactoryABI } from '../generated'
 import { useReadContract, ComposeReadContractConfig } from './use-read-contract'
 import {
@@ -10,24 +11,34 @@ type ReadParams<TFunctioName extends string> = ComposeReadContractConfig<
   TFunctioName
 >
 
-export const useImplementation = (
-  params: ReadParams<'implementation'>,
-  watch = false
-) =>
-  useReadContract(
-    {
-      abi: erc721FactoryABI,
+type WriteParams<TFunctioName extends string> = ComposeWriteContractConfig<
+  typeof erc721FactoryABI,
+  TFunctioName
+>
+
+export const useErc721Factory = (
+  config: Pick<ReadContractConfig, 'address' | 'chainId'>
+) => {
+  const baseConfig = {
+    ...config,
+    abi: erc721FactoryABI,
+  }
+
+  const implementation = (params: ReadParams<'implementation'>) =>
+    useReadContract({
       functionName: 'implementation',
       ...params,
-    },
-    watch
-  )
+      ...baseConfig,
+    })
 
-export const useClone = (params: ComposeWriteContractConfig) =>
-  useWriteContract({
-    functionName: 'clone',
-    abi: erc721FactoryABI,
-    ...params,
-  })
+  const clone = (params: WriteParams<'clone'>) =>
+    useWriteContract({
+      functionName: 'clone',
+      ...params,
+      ...baseConfig,
+    })
+
+  return { implementation, clone }
+}
 
 export { erc721FactoryABI }

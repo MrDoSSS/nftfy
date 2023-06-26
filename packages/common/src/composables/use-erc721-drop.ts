@@ -1,5 +1,5 @@
 import { erc721DropABI } from '../generated'
-import { reactive, watch as vueWatch } from 'vue'
+import { reactive, watch } from 'vue'
 import { ReadContractConfig } from '@wagmi/core'
 import { useReadContract, ComposeReadContractConfig } from './use-read-contract'
 import {
@@ -13,82 +13,150 @@ type ReadParams<TFunctioName extends string> = ComposeReadContractConfig<
   TFunctioName
 >
 
+type WriteParams<TFunctioName extends string> = ComposeWriteContractConfig<
+  typeof erc721DropABI,
+  TFunctioName
+>
+
 export const useErc721Drop = (
-  params: Pick<ReadContractConfig, 'address' | 'chainId'>
+  config: Pick<ReadContractConfig, 'address' | 'chainId'>
 ) => {
   const baseConfig = {
-    ...params,
+    ...config,
     abi: erc721DropABI,
   }
 
-  const maxTotalSupply = <TParams extends Parameters<typeof useMaxTotalSupply>>(
-    params?: Omit<TParams[0], 'address' | 'abi'>,
-    watch?: TParams[1]
-  ) => {
-    const config = {
-      ...baseConfig,
+  const maxTotalSupply = (params: ReadParams<'maxTotalSupply'> = {}) =>
+    useReadContract({
+      functionName: 'maxTotalSupply',
       ...params,
-    }
-    return useMaxTotalSupply(config, watch)
+      ...baseConfig,
+    })
+
+  const totalMinted = (params: ReadParams<'totalMinted'> = {}) =>
+    useReadContract({
+      functionName: 'totalMinted',
+      ...params,
+      ...baseConfig,
+    })
+
+  const baseTokenURI = (params: ReadParams<'baseTokenURI'> = {}) =>
+    useReadContract({
+      functionName: 'baseTokenURI',
+      ...params,
+      ...baseConfig,
+    })
+
+  const mintRules = (params: ReadParams<'mintRules'> = {}) => {
+    const mintRules = useReadContract({
+      functionName: 'mintRules',
+      ...params,
+      ...baseConfig,
+    })
+    const data = reactive<
+      | {
+          pending: true
+        }
+      | {
+          pending: false
+          value: {
+            supply: bigint
+            maxPerWallet: bigint
+            freePerWallet: bigint
+            price: bigint
+          }
+        }
+    >({
+      pending: mintRules.pending as true,
+    })
+
+    watch(mintRules, (newValue) => {
+      data.pending = newValue.pending
+
+      if (data.pending || newValue.pending) return
+
+      const [supply, maxPerWallet, freePerWallet, price] = newValue.value
+
+      data.value = {
+        supply,
+        maxPerWallet,
+        freePerWallet,
+        price,
+      }
+    })
+
+    return data
   }
 
-  const totalMinted = <TParams extends Parameters<typeof useTotalMinted>>(
-    params?: Omit<TParams[0], 'address' | 'abi'>,
-    watch?: TParams[1]
-  ) => {
-    const config = {
-      ...baseConfig,
+  const numberMinted = (params: ReadParams<'numberMinted'>) =>
+    useReadContract({
+      functionName: 'numberMinted',
       ...params,
-    }
-    return useTotalMinted(config, watch)
-  }
-
-  const baseTokenURI = <TParams extends Parameters<typeof useBaseTokenURI>>(
-    params?: Omit<TParams[0], 'address' | 'abi'>,
-    watch?: TParams[1]
-  ) => {
-    const config = {
       ...baseConfig,
-      ...params,
-    }
-    return useBaseTokenURI(config, watch)
-  }
+    })
 
-  const mintRules = <TParams extends Parameters<typeof useMintRules>>(
-    params?: Omit<TParams[0], 'address' | 'abi'>,
-    watch?: TParams[1]
-  ) => {
-    const config = {
+  const nonFreeAmount = (params: ReadParams<'nonFreeAmount'>) =>
+    useReadContract({
+      functionName: 'nonFreeAmount',
+      ...params,
       ...baseConfig,
-      ...params,
-    }
-    return useMintRules(config, watch)
-  }
+    })
 
-  const numberMinted = <TParams extends Parameters<typeof useNumberMinted>>(
-    params: Omit<TParams[0], 'address' | 'abi'>,
-    watch?: TParams[1]
-  ) => {
-    const config = {
+  const balance = ({ watch }: { watch?: boolean }) =>
+    useBalance({
+      address: baseConfig.address,
+      chainId: baseConfig.chainId,
+      watch,
+    })
+
+  const mint = (params: WriteParams<'mint'>) =>
+    useWriteContract({
+      functionName: 'mint',
+      ...params,
       ...baseConfig,
-      ...params,
-    }
-    return useNumberMinted(config, watch)
-  }
+    })
 
-  const nonFreeAmount = <TParams extends Parameters<typeof useNonFreeAmount>>(
-    params: Omit<TParams[0], 'address' | 'abi'>,
-    watch?: TParams[1]
-  ) => {
-    const config = {
+  const setBaseURI = (params: WriteParams<'setBaseURI'>) =>
+    useWriteContract({
+      functionName: 'setBaseURI',
+      ...params,
       ...baseConfig,
-      ...params,
-    }
-    return useNonFreeAmount(config, watch)
-  }
+    })
 
-  const balance = () =>
-    useBalance({ address: baseConfig.address, chainId: baseConfig.chainId })
+  const setMintRules = (params: WriteParams<'setMintRules'>) =>
+    useWriteContract({
+      functionName: 'setMintRules',
+      ...params,
+      ...baseConfig,
+    })
+
+  const setMaxTotalSupply = (params: WriteParams<'setMaxTotalSupply'>) =>
+    useWriteContract({
+      functionName: 'setMaxTotalSupply',
+      ...params,
+      ...baseConfig,
+    })
+
+  const setRoot = (params: WriteParams<'setRoot'>) =>
+    useWriteContract({
+      functionName: 'setRoot',
+      ...params,
+      ...baseConfig,
+    })
+
+  const airdrop = (params: WriteParams<'airdrop'>) =>
+    useWriteContract({
+      functionName: 'airdrop',
+      ...params,
+      ...baseConfig,
+    })
+
+  const withdraw = (params: WriteParams<'withdraw'>) =>
+    useWriteContract({
+      functionName: 'withdraw',
+      ...params,
+      ...baseConfig,
+    })
 
   return {
     totalMinted,
@@ -98,161 +166,14 @@ export const useErc721Drop = (
     balance,
     numberMinted,
     nonFreeAmount,
+    mint,
+    setBaseURI,
+    setMaxTotalSupply,
+    setMintRules,
+    setRoot,
+    airdrop,
+    withdraw,
   }
 }
 
-export const useTotalMinted = (
-  params: ReadParams<'totalMinted'>,
-  watch = false
-) =>
-  useReadContract(
-    {
-      functionName: 'totalMinted',
-      abi: erc721DropABI,
-      ...params,
-    },
-    watch
-  )
-export const useMaxTotalSupply = (
-  params: ReadParams<'maxTotalSupply'>,
-  watch = false
-) =>
-  useReadContract(
-    {
-      functionName: 'maxTotalSupply',
-      abi: erc721DropABI,
-      ...params,
-    },
-    watch
-  )
-export const useBaseTokenURI = (
-  params: ReadParams<'baseTokenURI'>,
-  watch = false
-) =>
-  useReadContract(
-    {
-      functionName: 'baseTokenURI',
-      abi: erc721DropABI,
-      ...params,
-    },
-    watch
-  )
-
-export const useMintRules = (
-  params: ReadParams<'mintRules'>,
-  watch = false
-) => {
-  const mintRules = useReadContract(
-    {
-      functionName: 'mintRules',
-      abi: erc721DropABI,
-      ...params,
-    },
-    watch
-  )
-  const data = reactive<{
-    pending: boolean
-    value?: {
-      supply: bigint
-      maxPerWallet: bigint
-      freePerWallet: bigint
-      price: bigint
-    }
-  }>({
-    pending: mintRules.pending,
-  })
-
-  vueWatch(mintRules, ({ pending, value }) => {
-    data.pending = pending
-
-    if (!value) return
-
-    const [supply, maxPerWallet, freePerWallet, price] = value
-
-    data.value = {
-      supply,
-      maxPerWallet,
-      freePerWallet,
-      price,
-    }
-  })
-
-  return data
-}
-
-export const useNumberMinted = (
-  params: ReadParams<'numberMinted'>,
-  watch = false
-) =>
-  useReadContract(
-    {
-      functionName: 'numberMinted',
-      abi: erc721DropABI,
-      ...params,
-    },
-    watch
-  )
-export const useNonFreeAmount = (
-  params: ReadParams<'nonFreeAmount'>,
-  watch = false
-) =>
-  useReadContract(
-    {
-      functionName: 'nonFreeAmount',
-      abi: erc721DropABI,
-      ...params,
-    },
-    watch
-  )
-
-export const useMint = (params: ComposeWriteContractConfig) =>
-  useWriteContract({
-    functionName: 'mint',
-    abi: erc721DropABI,
-    ...params,
-  })
-
-export const useSetBaseURI = (params: ComposeWriteContractConfig) =>
-  useWriteContract({
-    functionName: 'setBaseURI',
-    abi: erc721DropABI,
-    ...params,
-  })
-
-export const useSetMintRules = (params: ComposeWriteContractConfig) =>
-  useWriteContract({
-    functionName: 'setMintRules',
-    abi: erc721DropABI,
-    ...params,
-  })
-
-export const useSetMaxTotalSupply = (params: ComposeWriteContractConfig) =>
-  useWriteContract({
-    functionName: 'setMaxTotalSupply',
-    abi: erc721DropABI,
-    ...params,
-  })
-
-export const useSetRoot = (params: ComposeWriteContractConfig) =>
-  useWriteContract({
-    functionName: 'setRoot',
-    abi: erc721DropABI,
-    ...params,
-  })
-
-export const useAirdrop = (params: ComposeWriteContractConfig) =>
-  useWriteContract({
-    functionName: 'airdrop',
-    abi: erc721DropABI,
-    ...params,
-  })
-
-export const useWithdraw = (params: ComposeWriteContractConfig) =>
-  useWriteContract({
-    functionName: 'airdrop',
-    abi: erc721DropABI,
-    ...params,
-  })
-
 export { erc721DropABI }
-

@@ -4,55 +4,29 @@ import {
   waitForTransaction,
   PrepareWriteContractConfig,
 } from '@wagmi/core'
+import { Abi } from 'viem'
+import { getAccount, getPublicClient } from '@wagmi/core'
 
-export type ComposeWriteContractConfig = Pick<
-  PrepareWriteContractConfig,
-  'address' | 'chainId'
+export type ComposeWriteContractConfig<
+  TAbi extends Abi,
+  TFunctioName extends string
+> = Omit<
+  PrepareWriteContractConfig<TAbi, TFunctioName>,
+  'abi' | 'address' | 'functionName' | 'chainId'
 >
 
-export const useWriteContract = (
-  baseConfig: Pick<
-    PrepareWriteContractConfig,
-    'address' | 'chainId' | 'abi' | 'functionName'
-  >
-) => {
-  return async (
-    params: Omit<
-      PrepareWriteContractConfig,
-      'address' | 'chainId' | 'abi' | 'functionName'
-    >
-  ) => {
-    const { request } = await prepareWriteContract({ ...baseConfig, ...params })
+export const useWriteContract = async (params: PrepareWriteContractConfig) => {
+  const publicClient = getPublicClient({ chainId: params.chainId })
+  const account = getAccount()
+  const gas = await publicClient.estimateContractGas({
+    ...params,
+    account: account.address!,
+  })
 
-    const { hash } = await writeContract(request)
-    const data = await waitForTransaction({ hash })
+  const { request } = await prepareWriteContract({ ...params, gas })
 
-    return data
-  }
+  const { hash } = await writeContract(request)
+  const data = await waitForTransaction({ hash })
+
+  return data
 }
-
-// export const useWriteContract = <
-//   TAbi extends Abi | readonly unknown[],
-//   TFunctionName extends TAbi extends Abi
-//     ? ExtractAbiFunctionNames<TAbi, 'view' | 'pure'>
-//     : string
-// >(
-//   config: Pick<
-//     PrepareWriteContractConfig<TAbi, TFunctionName>,
-//     'abi' | 'functionName' | 'address'
-//   >
-// ) => {
-//   return async (
-//     params: Omit<
-//       PrepareWriteContractConfig<TAbi, TFunctionName>,
-//       'abi' | 'functionName' | 'address'
-//     >
-//   ) => {
-//     const { request } = await prepareWriteContract({ ...config, ...params })
-
-//     const { hash } = await writeContract(request)
-//     const data = await waitForTransaction({ hash })
-
-//     return data
-//   }
-// }

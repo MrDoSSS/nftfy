@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { PlusIcon } from '@heroicons/vue/24/solid'
 import { ref } from 'vue'
-import { projects } from '@nftfy/common/collections'
-import { useCollection } from 'vuefire'
+import { projects, Project } from '@nftfy/common/collections'
 import AddProjectDrawer from '@/components/drawers/AddProject.vue'
 import { sliceAddress } from '@nftfy/common'
 
 const addDrawerEl = ref<InstanceType<typeof AddProjectDrawer>>()
 
-const items = useCollection(projects.collectionRef)
-const loading = items.pending
+const query = projects.query()
+const loading = ref(true)
+const items = ref<Project[]>()
+
+query.then((v) => (items.value = v)).finally(() => (loading.value = false))
 </script>
 
 <template>

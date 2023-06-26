@@ -18,8 +18,7 @@
     "pinia": "^2.1.4",
     "viem": "^1.0.7",
     "vue": "^3.2.47",
-    "vue-router": "^4.2.2",
-    "vuefire": "^3.1.0"
+    "vue-router": "^4.2.2"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.9",

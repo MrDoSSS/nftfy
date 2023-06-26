@@ -6,7 +6,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build:frontend": "yarn workspace @nftfy/dashboard build && yarn workspace @nftfy/mint build"
+    "web3:node": "yarn workspace @nftfy/web3 hardhat node",
+    "web3:deploy": "yarn workspace @nftfy/web3 hardhat run --network localhost scripts/deploy.ts",
+    "frontend:dev": "yarn workspace @nftfy/dashboard dev",
+    "frontend:build": "yarn workspace @nftfy/dashboard build && yarn workspace @nftfy/mint build"
   },
   "devDependencies": {
     "@types/node": "^20.3.0",

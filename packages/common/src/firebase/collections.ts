@@ -8,12 +8,16 @@ import {
   QueryDocumentSnapshot,
   SnapshotOptions,
   UpdateData,
+  getDoc,
+  query,
+  QueryConstraint,
+  getDocs,
 } from 'firebase/firestore'
 import { db } from './'
 import { localhost, goerli, mainnet } from '@wagmi/core/chains'
 
 export interface Project {
-  id?: string
+  id: string
   name: string
   symbol: string
   contractAddress: `0x${string}`
@@ -28,11 +32,25 @@ class Collection<T extends DocumentData = DocumentData> {
     return collection(db, this.collectionName).withConverter<T>(this)
   }
 
+  async query(constraints: QueryConstraint[] = []) {
+    const q = query(this.collectionRef, ...constraints)
+    const snapshot = await getDocs(q)
+    if (snapshot.empty) return []
+
+    const data: T[] = []
+
+    snapshot.forEach((d) => {
+      data.push(d.data())
+    })
+
+    return data
+  }
+
   docRef(id: string) {
     return doc(db, this.collectionName, id).withConverter<T>(this)
   }
 
-  add(data: T) {
+  add(data: Omit<T, 'id'>) {
     return addDoc(this.collectionRef, data)
   }
 
@@ -42,6 +60,14 @@ class Collection<T extends DocumentData = DocumentData> {
 
   delete(id: string) {
     return deleteDoc(this.docRef(id))
+  }
+
+  async get(id: string) {
+    const snapshot = await getDoc(this.docRef(id))
+
+    if (snapshot.exists()) {
+      return snapshot.data()
+    }
   }
 
   toFirestore(object: T) {

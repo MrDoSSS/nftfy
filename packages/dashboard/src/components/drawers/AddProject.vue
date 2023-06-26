@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, reactive, computed } from 'vue'
 import { PlusIcon, MinusIcon } from '@heroicons/vue/24/solid'
-import { useClone, erc721FactoryABI } from '@nftfy/common'
+import { useErc721Factory, erc721FactoryABI } from '@nftfy/common'
 import { decodeEventLog } from 'viem'
 import { useRouter } from 'vue-router'
 import { projects } from '@nftfy/common/collections'
@@ -21,7 +21,12 @@ const deployStatusModalEl = ref<InstanceType<typeof DeployStatusModal>>()
 
 defineExpose({ show, hide })
 
-const clone = useClone()
+const { chain } = getNetwork()
+
+const erc721Factory = useErc721Factory({
+  address: import.meta.env.VITE_FACTORY_ADDRESS,
+  chainId: chain?.id,
+})
 
 const data = reactive({
   name: '',
@@ -52,12 +57,9 @@ const status = ref<'deploying' | 'creating'>('deploying')
 const deployContract = async () => {
   status.value = 'deploying'
   deployStatusModalEl.value?.show()
-  const { logs } = await clone([
-    data.name,
-    data.symbol,
-    payees.value,
-    shares.value,
-  ])
+  const { logs } = await erc721Factory.clone({
+    args: [data.name, data.symbol, payees.value, shares.value],
+  })
 
   const events = logs
     .filter(

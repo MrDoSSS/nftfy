@@ -10,7 +10,10 @@ import { ExtractAbiFunctionNames } from 'abitype'
 export type ComposeReadContractConfig<
   TAbi extends Abi,
   TFunctioName extends string
-> = Omit<ReadContractConfig<TAbi, TFunctioName>, 'functionName' | 'abi'>
+> = Omit<
+  ReadContractConfig<TAbi, TFunctioName>,
+  'functionName' | 'abi' | 'address' | 'chainId'
+> & { watch?: boolean }
 
 export const useReadContract = <
   TAbi extends Abi | readonly unknown[],
@@ -20,11 +23,12 @@ export const useReadContract = <
   TReturnType = ReadContractReturnType<TAbi, TFunctionName>
 >(
   config: ReadContractConfig<TAbi, TFunctionName> & {
-    listenToBlock?: boolean
-  },
-  watch = false
+    watch?: boolean
+  }
 ) => {
-  const data = reactive<{ value?: TReturnType; pending: boolean }>({
+  const data = reactive<
+    { pending: true } | { pending: false; value: TReturnType }
+  >({
     pending: true,
   })
 
@@ -32,16 +36,19 @@ export const useReadContract = <
 
   readContract(config).then((value) => {
     data.pending = false
-    data.value = value as UnwrapRef<TReturnType>
 
-    if (watch) {
-      unwatch = watchReadContract(config, (newValue) => {
-        data.value = newValue as UnwrapRef<TReturnType>
-      })
-    }
+    if (data.pending === false) data.value = value as UnwrapRef<TReturnType>
+
+    unwatch = watchReadContract(
+      { ...config, listenToBlock: config.watch },
+      (newValue) => {
+        if (data.pending === false)
+          data.value = newValue as UnwrapRef<TReturnType>
+      }
+    )
   })
 
-  if (watch && unwatch) {
+  if (unwatch) {
     onUnmounted(unwatch)
   }
 
