@@ -1,5 +1,4 @@
 import { erc721DropABI } from '../generated'
-import { reactive, watch } from 'vue'
 import { ReadContractConfig } from '@wagmi/core'
 import { useReadContract, ComposeReadContractConfig } from './use-read-contract'
 import {
@@ -47,47 +46,6 @@ export const useErc721Drop = (
       ...baseConfig,
     })
 
-  const mintRules = (params: ReadParams<'mintRules'> = {}) => {
-    const mintRules = useReadContract({
-      functionName: 'mintRules',
-      ...params,
-      ...baseConfig,
-    })
-    const data = reactive<
-      | {
-          pending: true
-        }
-      | {
-          pending: false
-          value: {
-            supply: bigint
-            maxPerWallet: bigint
-            freePerWallet: bigint
-            price: bigint
-          }
-        }
-    >({
-      pending: mintRules.pending as true,
-    })
-
-    watch(mintRules, (newValue) => {
-      data.pending = newValue.pending
-
-      if (data.pending || newValue.pending) return
-
-      const [supply, maxPerWallet, freePerWallet, price] = newValue.value
-
-      data.value = {
-        supply,
-        maxPerWallet,
-        freePerWallet,
-        price,
-      }
-    })
-
-    return data
-  }
-
   const numberMinted = (params: ReadParams<'numberMinted'>) =>
     useReadContract({
       functionName: 'numberMinted',
@@ -95,9 +53,30 @@ export const useErc721Drop = (
       ...baseConfig,
     })
 
-  const nonFreeAmount = (params: ReadParams<'nonFreeAmount'>) =>
+  const phases = (params: ReadParams<'phases'> = {}) =>
     useReadContract({
-      functionName: 'nonFreeAmount',
+      functionName: 'phases',
+      ...params,
+      ...baseConfig,
+    })
+
+  const numberMintedPerPhases = (params: ReadParams<'numberMintedPerPhases'>) =>
+    useReadContract({
+      functionName: 'numberMintedPerPhases',
+      ...params,
+      ...baseConfig,
+    })
+
+  const globalMaxPerWallet = (params: ReadParams<'globalMaxPerWallet'> = {}) =>
+    useReadContract({
+      functionName: 'globalMaxPerWallet',
+      ...params,
+      ...baseConfig,
+    })
+
+  const burnable = (params: ReadParams<'burnable'> = {}) =>
+    useReadContract({
+      functionName: 'burnable',
       ...params,
       ...baseConfig,
     })
@@ -116,6 +95,13 @@ export const useErc721Drop = (
       ...baseConfig,
     })
 
+  const burn = (params: WriteParams<'burn'>) =>
+    useWriteContract({
+      functionName: 'burn',
+      ...params,
+      ...baseConfig,
+    })
+
   const setBaseURI = (params: WriteParams<'setBaseURI'>) =>
     useWriteContract({
       functionName: 'setBaseURI',
@@ -123,23 +109,25 @@ export const useErc721Drop = (
       ...baseConfig,
     })
 
-  const setMintRules = (params: WriteParams<'setMintRules'>) =>
+  const setBurnable = (params: WriteParams<'setBurnable'>) =>
     useWriteContract({
-      functionName: 'setMintRules',
+      functionName: 'setBurnable',
       ...params,
       ...baseConfig,
     })
 
-  const setMaxTotalSupply = (params: WriteParams<'setMaxTotalSupply'>) =>
+  const setGlobalMaxPerWallet = (
+    params: WriteParams<'setGlobalMaxPerWallet'>
+  ) =>
     useWriteContract({
-      functionName: 'setMaxTotalSupply',
+      functionName: 'setGlobalMaxPerWallet',
       ...params,
       ...baseConfig,
     })
 
-  const setRoot = (params: WriteParams<'setRoot'>) =>
+  const setPhases = (params: WriteParams<'setPhases'>) =>
     useWriteContract({
-      functionName: 'setRoot',
+      functionName: 'setPhases',
       ...params,
       ...baseConfig,
     })
@@ -162,17 +150,20 @@ export const useErc721Drop = (
     totalMinted,
     maxTotalSupply,
     baseTokenURI,
-    mintRules,
-    balance,
     numberMinted,
-    nonFreeAmount,
+    numberMintedPerPhases,
+    globalMaxPerWallet,
+    burnable,
+    phases,
+    balance,
     mint,
     setBaseURI,
-    setMaxTotalSupply,
-    setMintRules,
-    setRoot,
     airdrop,
     withdraw,
+    setBurnable,
+    setGlobalMaxPerWallet,
+    setPhases,
+    burn,
   }
 }
 

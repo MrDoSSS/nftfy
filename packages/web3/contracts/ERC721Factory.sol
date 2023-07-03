@@ -18,11 +18,12 @@ contract ERC721Factory is Ownable {
     string memory _name,
     string memory _symbol,
     address[] memory _payees,
-    uint256[] memory _shares
+    uint256[] memory _shares,
+    address _operatorFilter
   ) external returns (address) {
     address payable _clone = payable(Clones.clone(implementation));
 
-    ERC721Drop(_clone).initialize(_name, _symbol, msg.sender, _payees, _shares);
+    ERC721Drop(_clone).initialize(_name, _symbol, msg.sender, _payees, _shares, _operatorFilter);
 
     emit ContractCreated(msg.sender, _clone);
 

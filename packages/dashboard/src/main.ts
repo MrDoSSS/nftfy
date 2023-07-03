@@ -15,8 +15,8 @@ initWeb3Modal(
   {
     themeVariables: {
       '--w3m-accent-color': 'hsl(var(--p))',
-      '--w3m-accent-fill-color': 'hsl(var(--pc)',
-      '--w3m-background-color': 'hsl(var(--p))',
+      '--w3m-accent-fill-color': 'hsl(var(--bc)',
+      '--w3m-background-color': 'hsl(var(--b3))',
     },
     themeMode: 'dark',
   }

@@ -16,11 +16,14 @@ const action = () => {
 
 <template>
   <NButton
-    class="btn-primary"
+    :class="{
+      'btn-outline': account.isConnected,
+      'btn-primary': !account.isConnected,
+    }"
     @click="action"
     :loading="opened && !account.isConnected"
   >
-    <template v-if="account.isConnected">{{ slicedAddress }}t</template>
+    <template v-if="account.isConnected">{{ slicedAddress }}</template>
     <template v-else> Connect wallet </template>
     <template #loading> Connecting </template>
   </NButton>

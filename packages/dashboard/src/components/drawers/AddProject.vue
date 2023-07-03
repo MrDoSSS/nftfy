@@ -37,6 +37,7 @@ const data = reactive({
       share: '',
     },
   ],
+  enforceRoyalties: false,
 })
 
 const payees = computed(() =>
@@ -56,39 +57,55 @@ const status = ref<'deploying' | 'creating'>('deploying')
 
 const deployContract = async () => {
   status.value = 'deploying'
+
+  const DEFAULT_OPERATOR_FILTER = '0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6'
+
   deployStatusModalEl.value?.show()
-  const { logs } = await erc721Factory.clone({
-    args: [data.name, data.symbol, payees.value, shares.value],
-  })
 
-  const events = logs
-    .filter(
-      (log) =>
-        log.address.toLowerCase() ===
-        import.meta.env.VITE_FACTORY_ADDRESS.toLowerCase()
+  try {
+    const { logs } = await erc721Factory.clone({
+      args: [
+        data.name,
+        data.symbol,
+        payees.value,
+        shares.value,
+        data.enforceRoyalties
+          ? DEFAULT_OPERATOR_FILTER
+          : '0x0000000000000000000000000000000000000000',
+      ],
+    })
+
+    const events = logs
+      .filter(
+        (log) =>
+          log.address.toLowerCase() ===
+          import.meta.env.VITE_FACTORY_ADDRESS.toLowerCase()
+      )
+      .map((log) =>
+        decodeEventLog({
+          abi: erc721FactoryABI,
+          data: log.data,
+          topics: log.topics,
+          strict: false,
+        })
+      )
+
+    const contractCreatedEvent = events.find(
+      (e) => e.eventName === 'ContractCreated'
     )
-    .map((log) =>
-      decodeEventLog({
-        abi: erc721FactoryABI,
-        data: log.data,
-        topics: log.topics,
-        strict: false,
-      })
-    )
 
-  const contractCreatedEvent = events.find(
-    (e) => e.eventName === 'ContractCreated'
-  )
+    if (!contractCreatedEvent) {
+      throw Error('ContractCreated event not found')
+    }
 
-  if (!contractCreatedEvent) {
-    throw Error('ContractCreated event not found')
+    const { contractAddress } = contractCreatedEvent.args as {
+      contractAddress: `0x${string}`
+    }
+
+    await addProject(contractAddress)
+  } finally {
+    deployStatusModalEl.value?.hide()
   }
-
-  const { contractAddress } = contractCreatedEvent.args as {
-    contractAddress: `0x${string}`
-  }
-
-  addProject(contractAddress)
 }
 
 const addProject = async (contractAddress: `0x${string}`) => {
@@ -108,7 +125,7 @@ const addProject = async (contractAddress: `0x${string}`) => {
 </script>
 
 <template>
-  <DeployStatusModal :status="status" ref="deployStatusModalEl" />
+  <DeployStatusModal ref="deployStatusModalEl" :status="status" />
   <div class="drawer drawer-end">
     <input type="checkbox" :checked="shown" class="drawer-toggle" />
     <div class="drawer-side z-50">
@@ -159,6 +176,20 @@ const addProject = async (contractAddress: `0x${string}`) => {
                 />
               </div>
             </div>
+          </div>
+          <div>
+            <h3 class="mb-4 text-2xl">Enforce Royalties</h3>
+
+            <p class="mb-4">
+              This will use OpenSea's Operator Filter Registry to prevent your
+              tokens from being traded on marketplaces that do not enforce
+              creator royalties.
+            </p>
+            <input
+              type="checkbox"
+              class="toggle"
+              v-model="data.enforceRoyalties"
+            />
           </div>
           <div>
             <div class="mb-4">

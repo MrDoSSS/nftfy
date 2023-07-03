@@ -34,6 +34,7 @@ class Collection<T extends DocumentData = DocumentData> {
 
   async query(constraints: QueryConstraint[] = []) {
     const q = query(this.collectionRef, ...constraints)
+
     const snapshot = await getDocs(q)
     if (snapshot.empty) return []
 

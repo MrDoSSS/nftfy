@@ -6,7 +6,6 @@ import { ERC721DropKey } from '@/di-keys'
 const pending = ref(false)
 
 const erc721Drop = inject(ERC721DropKey)!
-
 const baseTokenURI = erc721Drop.baseTokenURI()
 
 const save = async () => {
@@ -15,8 +14,6 @@ const save = async () => {
   try {
     pending.value = true
     await erc721Drop.setBaseURI({ args: [baseTokenURI.value] })
-  } catch (e) {
-    console.error(e)
   } finally {
     pending.value = false
   }

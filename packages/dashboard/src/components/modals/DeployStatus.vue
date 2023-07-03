@@ -4,27 +4,25 @@ import { SquaresPlusIcon, CheckIcon } from '@heroicons/vue/24/solid'
 
 interface Props {
   status: 'deploying' | 'creating'
-  errors?: string
 }
-
 const modalEl = ref<HTMLDialogElement>()
 
 const show = () => modalEl.value?.showModal()
 const hide = () => modalEl.value?.close()
 
 defineExpose({ show, hide })
-
 defineProps<Props>()
 </script>
 
 <template>
   <dialog
-    class="modal outline-none backdrop:bg-black/70"
+    class="modal max-sm:modal-bottom outline-none backdrop:bg-black/70"
     ref="modalEl"
     @cancel.prevent=""
   >
     <form method="dialog" class="modal-box">
       <h3 class="mb-4 text-lg font-bold">Deploy Status</h3>
+
       <div
         class="bg-base-200 border-neutral mb-4 flex items-center gap-4 rounded-lg border p-4"
         :class="{ 'opacity-60': status === 'creating' }"

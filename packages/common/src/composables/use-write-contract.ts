@@ -19,7 +19,11 @@ export const useWriteContract = async (params: PrepareWriteContractConfig) => {
   const publicClient = getPublicClient({ chainId: params.chainId })
   const account = getAccount()
   const gas = await publicClient.estimateContractGas({
-    ...params,
+    address: params.address,
+    abi: params.abi,
+    functionName: params.functionName,
+    args: params.args,
+    value: params.value,
     account: account.address!,
   })
 

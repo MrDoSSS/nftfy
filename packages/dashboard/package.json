@@ -10,14 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@headlessui/vue": "^1.7.14",
     "@heroicons/vue": "^2.0.18",
-    "@wagmi/core": "^1.2.0",
+    "@openzeppelin/merkle-tree": "^1.0.5",
+    "@wagmi/core": "^1.3.3",
     "firebase": "^9.22.2",
     "nft.storage": "^7.1.0",
-    "pinia": "^2.1.4",
-    "viem": "^1.0.7",
-    "vue": "^3.2.47",
+    "viem": "^1.2.9",
+    "vue": "^3.3.4",
     "vue-router": "^4.2.2"
   },
   "devDependencies": {

@@ -35,7 +35,9 @@ const shown = computed<boolean>(
           <NLogo class="hidden text-2xl md:text-4xl xl:block" />
         </div>
         <div class="h-4"></div>
-        <ul class="menu menu-lg gap-1 px-2 py-0" id="main-drawer-menu"></ul>
+        <ul class="menu menu-lg gap-1 px-2 py-0" id="main-drawer-menu">
+          <RouterView name="navigation" />
+        </ul>
       </aside>
     </div>
   </div>

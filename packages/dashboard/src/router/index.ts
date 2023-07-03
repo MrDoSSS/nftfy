@@ -13,7 +13,10 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: '/projects/:id',
-        component: () => import('@/layouts/Project.vue'),
+        components: {
+          default: () => import('@/layouts/Project.vue'),
+          navigation: () => import('@/components/navigations/Project.vue'),
+        },
         meta: {
           hasDrawer: true,
         },
@@ -31,6 +34,11 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'website',
                 name: 'project-website',
                 component: () => import('@/pages/projects/Website.vue'),
+              },
+              {
+                path: 'phases',
+                name: 'project-phases',
+                component: () => import('@/pages/projects/Phases.vue'),
               },
             ],
           },

@@ -4,7 +4,7 @@ import {
   ReadContractConfig,
 } from '@wagmi/core'
 import { Abi, ReadContractReturnType } from 'viem'
-import { UnwrapRef, onUnmounted, reactive } from 'vue'
+import { UnwrapRef, onUnmounted, reactive, watch } from 'vue'
 import { ExtractAbiFunctionNames } from 'abitype'
 
 export type ComposeReadContractConfig<
@@ -32,25 +32,35 @@ export const useReadContract = <
     pending: true,
   })
 
-  let unwatch: ReturnType<typeof watchReadContract> | undefined = undefined
+  let unwatchReadContract: ReturnType<typeof watchReadContract> | undefined =
+    undefined
 
-  readContract(config).then((value) => {
-    data.pending = false
+  const unwatch = watch(
+    config,
+    () => {
+      unwatchReadContract?.()
 
-    if (data.pending === false) data.value = value as UnwrapRef<TReturnType>
+      readContract(config).then((value) => {
+        data.pending = false
 
-    unwatch = watchReadContract(
-      { ...config, listenToBlock: config.watch },
-      (newValue) => {
-        if (data.pending === false)
-          data.value = newValue as UnwrapRef<TReturnType>
-      }
-    )
+        if (data.pending === false) data.value = value as UnwrapRef<TReturnType>
+
+        unwatchReadContract = watchReadContract(
+          { ...config, listenToBlock: config.watch },
+          (newValue) => {
+            if (data.pending === false)
+              data.value = newValue as UnwrapRef<TReturnType>
+          }
+        )
+      })
+    },
+    { deep: true, immediate: true }
+  )
+
+  onUnmounted(() => {
+    unwatch()
+    unwatchReadContract?.()
   })
-
-  if (unwatch) {
-    onUnmounted(unwatch)
-  }
 
   return data
 }
