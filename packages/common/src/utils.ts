@@ -1,5 +1,6 @@
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree'
 import { isAddressEqual, Address } from 'viem'
+import { MaybeRef, unref } from 'vue'
 
 export interface StandardMerkleTreeData<T extends any[]> {
   format: 'standard-v1'
@@ -38,4 +39,18 @@ export const getMerkleProof = <T extends any[]>(
       return proof
     }
   }
+}
+
+type DeepUnref<T> = T extends MaybeRef<infer U>
+  ? U
+  : T extends Array<infer V>
+  ? DeepUnref<V>[]
+  : T
+
+export const deepUnref = <T>(value: T): DeepUnref<T> => {
+  if (Array.isArray(value)) {
+    return value.map((item) => deepUnref(item)) as DeepUnref<T>
+  }
+
+  return unref(value) as DeepUnref<T>
 }

@@ -6,6 +6,8 @@ import {
   ComposeWriteContractConfig,
 } from './use-write-contract'
 import { useBalance } from './use-balance'
+import { MaybeRef, unref } from 'vue'
+import { deepUnref } from '../utils'
 
 type ReadParams<TFunctioName extends string> = ComposeReadContractConfig<
   typeof erc721DropABI,
@@ -46,12 +48,27 @@ export const useErc721Drop = (
       ...baseConfig,
     })
 
-  const numberMinted = (params: ReadParams<'numberMinted'>) =>
-    useReadContract({
+  const numberMinted = <
+    B extends ReadParams<'numberMinted'> = ReadParams<'numberMinted'>
+  >(params: {
+    args: [MaybeRef<B['args'][number]>]
+    blockTag?: MaybeRef<B['blockTag']>
+    blockNumber?: MaybeRef<B['blockNumber']>
+    watch?: MaybeRef<B['watch']>
+  }) => {
+    const cfg = {
+      args: deepUnref(params.args) as B['args'],
+      blockTag: unref(params.blockTag),
+      blockNumber: unref(params.blockNumber),
+      watch: unref(params.watch),
+    }
+
+    return useReadContract({
       functionName: 'numberMinted',
-      ...params,
+      ...cfg,
       ...baseConfig,
     })
+  }
 
   const phases = (params: ReadParams<'phases'> = {}) =>
     useReadContract({
