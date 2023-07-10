@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, inject } from 'vue'
-import NButton from '@/components/NButton.vue'
+import AppButton from '@/components/AppButton.vue'
 import { ERC721DropKey } from '@/di-keys'
 
 const pending = ref(false)
@@ -33,10 +33,10 @@ const save = async () => {
         />
       </div>
       <div class="card-actions justify-start">
-        <NButton
+        <AppButton
           class="btn-primary btn-block btn-sm md:w-auto"
           :loading="pending"
-          >Save <template #loading>Saving...</template></NButton
+          >Save <template #loading>Saving...</template></AppButton
         >
       </div>
     </form>

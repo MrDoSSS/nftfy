@@ -17,5 +17,5 @@ if (!project.value) {
 </script>
 
 <template>
-  <RouterView></RouterView>
+  <RouterView />
 </template>

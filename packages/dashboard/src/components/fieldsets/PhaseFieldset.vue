@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { formatEther, parseEther } from 'viem'
 import { computed, ref } from 'vue'
-import NButton from '@/components/NButton.vue'
+import AppButton from '@/components/AppButton.vue'
+import { Address } from 'viem'
 
 const props = defineProps<{
   supply: bigint
   totalMinted: bigint
   maxPerWallet: bigint
-  root: `0x${string}`
+  root: Address
   isActive: boolean
   price: bigint
   name: string
@@ -70,17 +71,17 @@ const editing = ref(false)
           </div>
         </h2>
         <div class="card-actions shrink-0 max-md:order-1">
-          <NButton
+          <AppButton
             type="button"
             class="btn-sm max-sm:btn-xs btn-ghost btn-outline"
             @click="editing = !editing"
-            >{{ editing ? 'Collapse' : 'Edit' }}</NButton
+            >{{ editing ? 'Collapse' : 'Edit' }}</AppButton
           >
-          <NButton
+          <AppButton
             type="button"
             class="btn-outline max-sm:btn-xs btn-error btn-sm"
             @click="$emit('remove')"
-            >Remove</NButton
+            >Remove</AppButton
           >
         </div>
       </div>

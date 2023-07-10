@@ -1,12 +1,9 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import NButton from '@/components/NButton.vue'
+import { useDrawer } from '@/composables/use-drawer'
 
-const shown = ref(false)
+import AppButton from '@/components/AppButton.vue'
 
-const show = () => (shown.value = true)
-const hide = () => (shown.value = false)
-
+const { shown, show, hide } = useDrawer()
 defineExpose({ show, hide })
 </script>
 
@@ -197,8 +194,8 @@ defineExpose({ show, hide })
               </div>
             </div>
           </details>
-          <NButton class="btn-primary btn-block mt-auto"
-            >Save <template #loading>Saving...</template></NButton
+          <AppButton class="btn-primary btn-block mt-auto"
+            >Save <template #loading>Saving...</template></AppButton
           >
         </form>
       </div>

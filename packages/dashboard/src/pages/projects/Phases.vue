@@ -1,13 +1,14 @@
 <script lang="ts" setup>
-import NButton from '@/components/NButton.vue'
 import { ProjectKey } from '@/di-keys'
 import { injectStrict } from '@/utils'
-import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import { useErc721Drop } from '@nftfy/common'
 import { PlusIcon } from '@heroicons/vue/24/solid'
 import { watch, ref } from 'vue'
-import Placeholder from '@/components/placeholders/Phases.vue'
-import Phase from '@/components/fieldsets/Phase.vue'
+import { Address } from 'viem'
+
+import AppButton from '@/components/AppButton.vue'
+import PhaseFieldset from '@/components/fieldsets/PhaseFieldset.vue'
+import TheMissingPhasesAlert from '@/components/alerts/TheMissingPhasesAlert.vue'
 
 const project = injectStrict(ProjectKey)
 
@@ -25,7 +26,7 @@ const phases = ref<
     supply: bigint
     totalMinted: bigint
     maxPerWallet: bigint
-    root: `0x${string}`
+    root: Address
     isActive: boolean
     price: bigint
     name: string
@@ -46,7 +47,7 @@ const unwatch = watch(
   }
 )
 
-const add = () =>
+const addPhase = () =>
   phases.value.push({
     supply: 0n,
     totalMinted: 0n,
@@ -57,7 +58,7 @@ const add = () =>
     name: `Phase #${phases.value.length + 1}`,
   })
 
-const remove = (id: number) => phases.value.splice(id, 1)
+const removePhase = (id: number) => phases.value.splice(id, 1)
 
 const save = async () => {
   try {
@@ -75,54 +76,44 @@ const save = async () => {
     Add various Minting Phases with their own Token Pricing, Supply, Wallet
     Limits and Allow List.
   </p>
-  <Placeholder v-if="savedPhases.pending" />
-  <template v-else>
-    <form @submit.prevent="save" ref="form" v-show="phases.length">
-      <Phase
-        v-for="(phase, i) in phases"
-        :key="i"
-        :totalMinted="phase.totalMinted"
-        v-model:name="phase.name"
-        v-model:supply="phase.supply"
-        v-model:max-per-wallet="phase.maxPerWallet"
-        v-model:price="phase.price"
-        v-model:is-active="phase.isActive"
-        v-model:root="phase.root"
-        @remove="remove(i)"
-      />
-    </form>
-    <div class="alert alert-warning mb-8" v-if="!phases.length">
-      <ExclamationTriangleIcon class="text-4xl" />
-      <div>
-        <h3 class="font-bold">Missing Minting Phases</h3>
-        <span>
-          You need to set at least one minting phase for people to mint this
-          drop.</span
-        >
+  <form @submit.prevent="save" ref="form" v-show="phases.length">
+    <PhaseFieldset
+      v-for="(phase, i) in phases"
+      :key="i"
+      :totalMinted="phase.totalMinted"
+      v-model:name="phase.name"
+      v-model:supply="phase.supply"
+      v-model:max-per-wallet="phase.maxPerWallet"
+      v-model:price="phase.price"
+      v-model:is-active="phase.isActive"
+      v-model:root="phase.root"
+      @remove="removePhase(i)"
+    />
+  </form>
+  <TheMissingPhasesAlert v-if="!phases.length" />
+  <div class="flex items-center gap-3 max-sm:flex-wrap sm:gap-5">
+    <AppButton
+      class="btn-outline max-sm:btn-sm max-sm:btn-block"
+      @click="addPhase"
+      ><PlusIcon />Add phase</AppButton
+    >
+    <div
+      class="tooltip join-item sm:ml-auto"
+      data-tip="This contract stores who has already minted NFTs from this contract and carries across minting phases. Resetting mint eligibility will reset this state permanently, and wallets that have already minted to their limit will be able to mint again."
+    >
+      <div class="form-control md:col-span-2">
+        <label class="label cursor-pointer">
+          <span class="label-text mr-3">Reset Eligibility</span>
+          <input type="checkbox" class="toggle" v-model="resetEligibility" />
+        </label>
       </div>
     </div>
-    <div class="flex items-center gap-3 max-sm:flex-wrap sm:gap-5">
-      <NButton class="btn-outline max-sm:btn-sm max-sm:btn-block" @click="add"
-        ><PlusIcon />Add phase</NButton
-      >
-      <div
-        class="tooltip join-item sm:ml-auto"
-        data-tip="This contract stores who has already minted NFTs from this contract and carries across minting phases. Resetting mint eligibility will reset this state permanently, and wallets that have already minted to their limit will be able to mint again."
-      >
-        <div class="form-control md:col-span-2">
-          <label class="label cursor-pointer">
-            <span class="label-text mr-3">Reset Eligibility</span>
-            <input type="checkbox" class="toggle" v-model="resetEligibility" />
-          </label>
-        </div>
-      </div>
-      <NButton
-        class="btn btn-primary max-sm:btn-sm max-sm:grow sm:w-32"
-        @click="form?.requestSubmit()"
-        :loading="pending"
-        >Save
-        <template #loading> Saving </template>
-      </NButton>
-    </div>
-  </template>
+    <AppButton
+      class="btn btn-primary max-sm:btn-sm max-sm:grow sm:w-32"
+      @click="form?.requestSubmit()"
+      :loading="pending"
+      >Save
+      <template #loading> Saving </template>
+    </AppButton>
+  </div>
 </template>

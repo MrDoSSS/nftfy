@@ -1,5 +1,5 @@
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree'
-import { isAddressEqual } from 'viem'
+import { isAddressEqual, Address } from 'viem'
 
 export interface StandardMerkleTreeData<T extends any[]> {
   format: 'standard-v1'
@@ -11,10 +11,7 @@ export interface StandardMerkleTreeData<T extends any[]> {
   leafEncoding: string[]
 }
 
-export const sliceAddress = (
-  address: `0x${string}` | undefined,
-  length = 4
-) => {
+export const sliceAddress = (address?: Address, length = 4) => {
   if (!address) return ''
 
   return `${address.slice(0, length)}...${address.slice(
@@ -22,7 +19,7 @@ export const sliceAddress = (
   )}`
 }
 
-export const generateMerkleTree = (addresses: `0x${string}`[]) => {
+export const generateMerkleTree = (addresses: Address[]) => {
   const values = addresses.map((addr) => [addr.toLowerCase()])
   const tree = StandardMerkleTree.of(values, ['address'])
 
@@ -31,13 +28,13 @@ export const generateMerkleTree = (addresses: `0x${string}`[]) => {
 
 export const getMerkleProof = <T extends any[]>(
   treeData: StandardMerkleTreeData<T>,
-  address: `0x${string}`
-): `0x${string}`[] | void => {
+  address: Address
+): Address[] | void => {
   const tree = StandardMerkleTree.load(treeData)
 
   for (const [i, [v]] of tree.entries()) {
     if (isAddressEqual(v, address)) {
-      const proof = tree.getProof(i) as `0x${string}`[]
+      const proof = tree.getProof(i) as Address[]
       return proof
     }
   }

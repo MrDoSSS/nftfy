@@ -55,7 +55,7 @@ contract ERC721Drop is
     __ERC721A_init(name_, symbol_);
     __Ownable_init();
     __PaymentSplitter_init(_payees, _shares);
-    __OperatorFilterer_init(_operatorFilter, _operatorFilter == address(0) ? false : true);
+    __OperatorFilterer_init(_operatorFilter, _operatorFilter != address(0));
 
     transferOwnership(_deployer);
 

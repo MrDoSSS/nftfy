@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import WebsiteSettingsDrawer from '@/components/drawers/WebsiteSettings.vue'
+import TheWebsiteSettingsDrawer from '@/components/drawers/TheWebsiteSettingsDrawer.vue'
 import {
   Cog6ToothIcon,
   ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/solid'
 
 const websiteSettingsDrawerEl =
-  ref<InstanceType<typeof WebsiteSettingsDrawer>>()
+  ref<InstanceType<typeof TheWebsiteSettingsDrawer>>()
 </script>
 
 <template>
-  <WebsiteSettingsDrawer ref="websiteSettingsDrawerEl" />
+  <TheWebsiteSettingsDrawer ref="websiteSettingsDrawerEl" />
   <div class="mb-5 flex gap-2">
     <button class="btn btn-sm" @click="websiteSettingsDrawerEl?.show">
       <Cog6ToothIcon />

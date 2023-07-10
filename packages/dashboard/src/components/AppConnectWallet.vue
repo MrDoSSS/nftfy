@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useAccount, useWeb3Modal } from '@nftfy/common'
-import NButton from './NButton.vue'
+import AppButton from './AppButton.vue'
 
 const { account, slicedAddress } = useAccount()
 const { connect, web3Modal, opened } = useWeb3Modal()
@@ -15,7 +15,7 @@ const action = () => {
 </script>
 
 <template>
-  <NButton
+  <AppButton
     :class="{
       'btn-outline': account.isConnected,
       'btn-primary': !account.isConnected,
@@ -26,5 +26,5 @@ const action = () => {
     <template v-if="account.isConnected">{{ slicedAddress }}</template>
     <template v-else> Connect wallet </template>
     <template #loading> Connecting </template>
-  </NButton>
+  </AppButton>
 </template>

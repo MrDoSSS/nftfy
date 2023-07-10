@@ -2,17 +2,14 @@
 import BaseTokenURIForm from '@/components/forms/BaseTokenURI.vue'
 
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/solid'
-import { Square2StackIcon, TrashIcon } from '@heroicons/vue/24/outline'
 
-import { ref, provide } from 'vue'
-import { projects } from '@nftfy/common/collections'
-import { useRouter } from 'vue-router'
+import { provide } from 'vue'
 import { useErc721Drop } from '@nftfy/common'
-import { sliceAddress } from '@nftfy/common'
 import { ProjectKey, ERC721DropKey } from '@/di-keys'
 import { injectStrict } from '@/utils'
 
-const router = useRouter()
+import CopyAddressButton from '@/components/buttons/CopyAddressButton.vue'
+import TheDeleteProjectButton from '@/components/buttons/TheDeleteProjectButton.vue'
 
 const project = injectStrict(ProjectKey)
 
@@ -26,26 +23,6 @@ provide(ERC721DropKey, erc721Drop)
 const maxTotalSupply = erc721Drop.maxTotalSupply()
 const totalMinted = erc721Drop.totalMinted({ watch: true })
 const balance = erc721Drop.balance({ watch: true })
-
-const copyAddress = async () => {
-  if (!project?.contractAddress) return
-
-  await navigator.clipboard.writeText(project.contractAddress)
-
-  copyTooltip.value = 'Copied'
-
-  setTimeout(() => (copyTooltip.value = 'Copy to clipboard'), 1000)
-}
-
-const copyTooltip = ref('Copy to clipboard')
-
-const deleteProject = async () => {
-  if (!project) return
-
-  await projects.delete(project.id)
-
-  router.replace({ name: 'projects' })
-}
 </script>
 
 <template>
@@ -53,20 +30,10 @@ const deleteProject = async () => {
     <h1 class="mb-4 text-4xl font-bold md:text-6xl">
       {{ project.name }} ({{ project.symbol }})
     </h1>
-    <button class="btn btn-outline btn-error text-xl" @click="deleteProject">
-      <TrashIcon />
-    </button>
+    <TheDeleteProjectButton />
   </div>
   <div class="mb-8 flex gap-3 md:mb-14">
-    <div class="tooltip tooltip-bottom" :data-tip="copyTooltip">
-      <button
-        class="badge badge-outline hover:badge-ghost p-3"
-        @click="copyAddress"
-      >
-        <Square2StackIcon class="mr-2" />
-        {{ sliceAddress(project.contractAddress, 6) }}
-      </button>
-    </div>
+    <CopyAddressButton :address="project.contractAddress" />
     <a
       :href="`${project.chain.blockExplorers.etherscan?.url}/address/${project.contractAddress}`"
       class="badge badge-outline hover:badge-ghost p-3"

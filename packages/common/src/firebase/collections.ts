@@ -15,12 +15,13 @@ import {
 } from 'firebase/firestore'
 import { db } from './'
 import { localhost, goerli, mainnet } from '@wagmi/core/chains'
+import { Address } from 'viem'
 
 export interface Project {
   id: string
   name: string
   symbol: string
-  contractAddress: `0x${string}`
+  contractAddress: Address
   chainId?: number
   chain?: typeof localhost | typeof goerli | typeof mainnet
 }

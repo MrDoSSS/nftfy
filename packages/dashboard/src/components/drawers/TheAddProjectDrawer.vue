@@ -2,24 +2,21 @@
 import { ref, reactive, computed } from 'vue'
 import { PlusIcon, MinusIcon } from '@heroicons/vue/24/solid'
 import { useErc721Factory, erc721FactoryABI } from '@nftfy/common'
-import { decodeEventLog } from 'viem'
+import { decodeEventLog, Address } from 'viem'
 import { useRouter } from 'vue-router'
 import { projects } from '@nftfy/common/collections'
 import { getNetwork } from '@wagmi/core'
+import { useDrawer } from '@/composables/use-drawer'
 
-import NButton from '@/components/NButton.vue'
-import DeployStatusModal from '@/components/modals/DeployStatus.vue'
+import AppButton from '@/components/AppButton.vue'
+import TheDeployStatusModal from '@/components/modals/TheDeployStatusModal.vue'
 
 const router = useRouter()
 
-const shown = ref(false)
-
-const show = () => (shown.value = true)
-const hide = () => (shown.value = false)
-
-const deployStatusModalEl = ref<InstanceType<typeof DeployStatusModal>>()
-
+const { shown, show, hide } = useDrawer()
 defineExpose({ show, hide })
+
+const deployStatusModalEl = ref<InstanceType<typeof TheDeployStatusModal>>()
 
 const { chain } = getNetwork()
 
@@ -41,7 +38,7 @@ const data = reactive({
 })
 
 const payees = computed(() =>
-  data.payees.map((item) => item.address as `0x${string}`)
+  data.payees.map((item) => item.address as Address)
 )
 const shares = computed(() => data.payees.map((item) => BigInt(item.share)))
 
@@ -99,7 +96,7 @@ const deployContract = async () => {
     }
 
     const { contractAddress } = contractCreatedEvent.args as {
-      contractAddress: `0x${string}`
+      contractAddress: Address
     }
 
     await addProject(contractAddress)
@@ -108,7 +105,7 @@ const deployContract = async () => {
   }
 }
 
-const addProject = async (contractAddress: `0x${string}`) => {
+const addProject = async (contractAddress: Address) => {
   status.value = 'creating'
 
   const { chain } = getNetwork()
@@ -125,7 +122,7 @@ const addProject = async (contractAddress: `0x${string}`) => {
 </script>
 
 <template>
-  <DeployStatusModal ref="deployStatusModalEl" :status="status" />
+  <TheDeployStatusModal ref="deployStatusModalEl" :status="status" />
   <div class="drawer drawer-end">
     <input type="checkbox" :checked="shown" class="drawer-toggle" />
     <div class="drawer-side z-50">
@@ -244,8 +241,8 @@ const addProject = async (contractAddress: `0x${string}`) => {
               </button>
             </div>
           </div>
-          <NButton class="btn-primary btn-block mt-auto"
-            >Deploy <template #loading>Deploying...</template></NButton
+          <AppButton class="btn-primary btn-block mt-auto"
+            >Deploy <template #loading>Deploying...</template></AppButton
           >
         </form>
       </div>
