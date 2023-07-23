@@ -23,8 +23,6 @@ provide(ERC721DropKey, erc721Drop)
 const maxTotalSupply = erc721Drop.maxTotalSupply()
 const totalMinted = erc721Drop.totalMinted({ watch: true })
 const balance = erc721Drop.balance({ watch: true })
-
-const numberMinted = erc721Drop.numberMinted({args: ['0xasd']})
 </script>
 
 <template>

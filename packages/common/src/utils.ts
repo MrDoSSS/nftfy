@@ -40,17 +40,3 @@ export const getMerkleProof = <T extends any[]>(
     }
   }
 }
-
-type DeepUnref<T> = T extends MaybeRef<infer U>
-  ? U
-  : T extends Array<infer V>
-  ? DeepUnref<V>[]
-  : T
-
-export const deepUnref = <T>(value: T): DeepUnref<T> => {
-  if (Array.isArray(value)) {
-    return value.map((item) => deepUnref(item)) as DeepUnref<T>
-  }
-
-  return unref(value) as DeepUnref<T>
-}

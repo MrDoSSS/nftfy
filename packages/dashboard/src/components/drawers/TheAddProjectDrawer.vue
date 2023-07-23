@@ -5,7 +5,7 @@ import { useErc721Factory, erc721FactoryABI } from '@nftfy/common'
 import { decodeEventLog, Address } from 'viem'
 import { useRouter } from 'vue-router'
 import { projects } from '@nftfy/common/collections'
-import { getNetwork } from '@wagmi/core'
+import { getNetwork, watchNetwork } from '@wagmi/core'
 import { useDrawer } from '@/composables/use-drawer'
 
 import AppButton from '@/components/AppButton.vue'
@@ -20,10 +20,16 @@ const deployStatusModalEl = ref<InstanceType<typeof TheDeployStatusModal>>()
 
 const { chain } = getNetwork()
 
-const erc721Factory = useErc721Factory({
+const factoryConfig = reactive({
   address: import.meta.env.VITE_FACTORY_ADDRESS,
   chainId: chain?.id,
 })
+
+watchNetwork(({ chain }) => {
+  factoryConfig.chainId = chain?.id
+})
+
+const erc721Factory = useErc721Factory(factoryConfig)
 
 const data = reactive({
   name: '',

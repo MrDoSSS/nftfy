@@ -6,8 +6,7 @@ import {
   ComposeWriteContractConfig,
 } from './use-write-contract'
 import { useBalance } from './use-balance'
-import { MaybeRef, unref } from 'vue'
-import { deepUnref } from '../utils'
+import { isReactive, reactive, toRefs } from 'vue'
 
 type ReadParams<TFunctioName extends string> = ComposeReadContractConfig<
   typeof erc721DropABI,
@@ -23,145 +22,164 @@ export const useErc721Drop = (
   config: Pick<ReadContractConfig, 'address' | 'chainId'>
 ) => {
   const baseConfig = {
-    ...config,
+    ...(isReactive(config) ? toRefs(config) : config),
     abi: erc721DropABI,
   }
 
   const maxTotalSupply = (params: ReadParams<'maxTotalSupply'> = {}) =>
-    useReadContract({
-      functionName: 'maxTotalSupply',
-      ...params,
-      ...baseConfig,
-    })
+    useReadContract(
+      reactive({
+        functionName: 'maxTotalSupply',
+        ...(isReactive(params) ? toRefs(params) : params),
+        ...baseConfig,
+      })
+    )
 
   const totalMinted = (params: ReadParams<'totalMinted'> = {}) =>
-    useReadContract({
-      functionName: 'totalMinted',
-      ...params,
-      ...baseConfig,
-    })
+    useReadContract(
+      reactive({
+        functionName: 'totalMinted',
+        ...(isReactive(params) ? toRefs(params) : params),
+        ...baseConfig,
+      })
+    )
 
   const baseTokenURI = (params: ReadParams<'baseTokenURI'> = {}) =>
-    useReadContract({
-      functionName: 'baseTokenURI',
-      ...params,
-      ...baseConfig,
-    })
+    useReadContract(
+      reactive({
+        functionName: 'baseTokenURI',
+        ...(isReactive(params) ? toRefs(params) : params),
+        ...baseConfig,
+      })
+    )
 
-  const numberMinted = <
-    B extends ReadParams<'numberMinted'> = ReadParams<'numberMinted'>
-  >(params: {
-    args: [MaybeRef<B['args'][number]>]
-    blockTag?: MaybeRef<B['blockTag']>
-    blockNumber?: MaybeRef<B['blockNumber']>
-    watch?: MaybeRef<B['watch']>
-  }) => {
-    const cfg = {
-      args: deepUnref(params.args) as B['args'],
-      blockTag: unref(params.blockTag),
-      blockNumber: unref(params.blockNumber),
-      watch: unref(params.watch),
-    }
-
-    return useReadContract({
-      functionName: 'numberMinted',
-      ...cfg,
-      ...baseConfig,
-    })
-  }
+  const numberMinted = (params: ReadParams<'numberMinted'>) =>
+    useReadContract(
+      reactive({
+        functionName: 'numberMinted',
+        ...(isReactive(params) ? toRefs(params) : params),
+        ...baseConfig,
+      })
+    )
 
   const phases = (params: ReadParams<'phases'> = {}) =>
-    useReadContract({
-      functionName: 'phases',
-      ...params,
-      ...baseConfig,
-    })
+    useReadContract(
+      reactive({
+        functionName: 'phases',
+        ...(isReactive(params) ? toRefs(params) : params),
+        ...baseConfig,
+      })
+    )
 
   const numberMintedPerPhases = (params: ReadParams<'numberMintedPerPhases'>) =>
-    useReadContract({
-      functionName: 'numberMintedPerPhases',
-      ...params,
-      ...baseConfig,
-    })
+    useReadContract(
+      reactive({
+        functionName: 'numberMintedPerPhases',
+        ...(isReactive(params) ? toRefs(params) : params),
+        ...baseConfig,
+      })
+    )
 
   const globalMaxPerWallet = (params: ReadParams<'globalMaxPerWallet'> = {}) =>
-    useReadContract({
-      functionName: 'globalMaxPerWallet',
-      ...params,
-      ...baseConfig,
-    })
+    useReadContract(
+      reactive({
+        functionName: 'globalMaxPerWallet',
+        ...(isReactive(params) ? toRefs(params) : params),
+        ...baseConfig,
+      })
+    )
 
   const burnable = (params: ReadParams<'burnable'> = {}) =>
-    useReadContract({
-      functionName: 'burnable',
-      ...params,
-      ...baseConfig,
-    })
+    useReadContract(
+      reactive({
+        functionName: 'burnable',
+        ...(isReactive(params) ? toRefs(params) : params),
+        ...baseConfig,
+      })
+    )
 
   const balance = ({ watch }: { watch?: boolean }) =>
-    useBalance({
-      address: baseConfig.address,
-      chainId: baseConfig.chainId,
-      watch,
-    })
+    useBalance(
+      reactive({
+        address: baseConfig.address,
+        chainId: baseConfig.chainId,
+        watch,
+      })
+    )
 
   const mint = (params: WriteParams<'mint'>) =>
-    useWriteContract({
-      functionName: 'mint',
-      ...params,
-      ...baseConfig,
-    })
+    useWriteContract(
+      reactive({
+        functionName: 'mint',
+        ...params,
+        ...baseConfig,
+      })
+    )
 
   const burn = (params: WriteParams<'burn'>) =>
-    useWriteContract({
-      functionName: 'burn',
-      ...params,
-      ...baseConfig,
-    })
+    useWriteContract(
+      reactive({
+        functionName: 'burn',
+        ...params,
+        ...baseConfig,
+      })
+    )
 
   const setBaseURI = (params: WriteParams<'setBaseURI'>) =>
-    useWriteContract({
-      functionName: 'setBaseURI',
-      ...params,
-      ...baseConfig,
-    })
+    useWriteContract(
+      reactive({
+        functionName: 'setBaseURI',
+        ...params,
+        ...baseConfig,
+      })
+    )
 
   const setBurnable = (params: WriteParams<'setBurnable'>) =>
-    useWriteContract({
-      functionName: 'setBurnable',
-      ...params,
-      ...baseConfig,
-    })
+    useWriteContract(
+      reactive({
+        functionName: 'setBurnable',
+        ...params,
+        ...baseConfig,
+      })
+    )
 
   const setGlobalMaxPerWallet = (
     params: WriteParams<'setGlobalMaxPerWallet'>
   ) =>
-    useWriteContract({
-      functionName: 'setGlobalMaxPerWallet',
-      ...params,
-      ...baseConfig,
-    })
+    useWriteContract(
+      reactive({
+        functionName: 'setGlobalMaxPerWallet',
+        ...params,
+        ...baseConfig,
+      })
+    )
 
   const setPhases = (params: WriteParams<'setPhases'>) =>
-    useWriteContract({
-      functionName: 'setPhases',
-      ...params,
-      ...baseConfig,
-    })
+    useWriteContract(
+      reactive({
+        functionName: 'setPhases',
+        ...params,
+        ...baseConfig,
+      })
+    )
 
   const airdrop = (params: WriteParams<'airdrop'>) =>
-    useWriteContract({
-      functionName: 'airdrop',
-      ...params,
-      ...baseConfig,
-    })
+    useWriteContract(
+      reactive({
+        functionName: 'airdrop',
+        ...params,
+        ...baseConfig,
+      })
+    )
 
   const withdraw = (params: WriteParams<'withdraw'>) =>
-    useWriteContract({
-      functionName: 'withdraw',
-      ...params,
-      ...baseConfig,
-    })
+    useWriteContract(
+      reactive({
+        functionName: 'withdraw',
+        ...params,
+        ...baseConfig,
+      })
+    )
 
   return {
     totalMinted,

@@ -5,6 +5,7 @@ import {
   useWriteContract,
   ComposeWriteContractConfig,
 } from './use-write-contract'
+import { reactive, toRefs } from 'vue'
 
 type ReadParams<TFunctioName extends string> = ComposeReadContractConfig<
   typeof erc721FactoryABI,
@@ -20,23 +21,27 @@ export const useErc721Factory = (
   config: Pick<ReadContractConfig, 'address' | 'chainId'>
 ) => {
   const baseConfig = {
-    ...config,
+    ...toRefs(config),
     abi: erc721FactoryABI,
   }
 
   const implementation = (params: ReadParams<'implementation'>) =>
-    useReadContract({
-      functionName: 'implementation',
-      ...params,
-      ...baseConfig,
-    })
+    useReadContract(
+      reactive({
+        functionName: 'implementation',
+        ...toRefs(params),
+        ...baseConfig,
+      })
+    )
 
   const clone = (params: WriteParams<'clone'>) =>
-    useWriteContract({
-      functionName: 'clone',
-      ...params,
-      ...baseConfig,
-    })
+    useWriteContract(
+      reactive({
+        functionName: 'clone',
+        ...params,
+        ...baseConfig,
+      })
+    )
 
   return { implementation, clone }
 }
