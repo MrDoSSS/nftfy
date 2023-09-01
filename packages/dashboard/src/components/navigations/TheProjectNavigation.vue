@@ -10,19 +10,24 @@ const route = useRoute()
 </script>
 
 <template>
-  <li>
-    <RouterLink :to="{ name: 'project', params: route.params }"
-      ><RocketLaunchIcon /> Overview</RouterLink
+  <RouterView name="navigation" v-slot="{ Component }">
+    <component :is="Component" v-if="Component" />
+    <template v-else>
+      <li>
+        <RouterLink :to="{ name: 'project', params: route.params }"
+          ><RocketLaunchIcon /> Overview</RouterLink
+        >
+      </li>
+      <li>
+        <RouterLink :to="{ name: 'project-phases', params: route.params }"
+          ><AdjustmentsHorizontalIcon /> Minting Phases</RouterLink
+        >
+      </li>
+      <li>
+        <RouterLink :to="{ name: 'project-website', params: route.params }"
+          ><GlobeAltIcon /> Website</RouterLink
+        >
+      </li></template
     >
-  </li>
-  <li>
-    <RouterLink :to="{ name: 'project-phases', params: route.params }"
-      ><AdjustmentsHorizontalIcon /> Minting Phases</RouterLink
-    >
-  </li>
-  <li>
-    <RouterLink :to="{ name: 'project-website', params: route.params }"
-      ><GlobeAltIcon /> Website</RouterLink
-    >
-  </li>
+  </RouterView>
 </template>

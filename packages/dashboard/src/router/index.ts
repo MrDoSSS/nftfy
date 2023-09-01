@@ -1,5 +1,16 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory,
+  RouteRecordRaw,
+  RouterView,
+} from 'vue-router'
 import BaseLayout from '@/layouts/Base.vue'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    hasDrawer?: boolean
+  }
+}
 
 const routes: RouteRecordRaw[] = [
   {
@@ -35,8 +46,18 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'website',
-            name: 'project-website',
-            component: () => import('@/pages/projects/Website.vue'),
+            components: {
+              default: RouterView,
+              navigation: () =>
+                import('@/components/navigations/TheWebsiteNavigation.vue'),
+            },
+            children: [
+              {
+                path: '',
+                name: 'project-website',
+                component: () => import('@/pages/projects/Website.vue'),
+              },
+            ],
           },
           {
             path: 'phases',

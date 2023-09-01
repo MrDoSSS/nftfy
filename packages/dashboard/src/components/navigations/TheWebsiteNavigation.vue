@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RocketLaunchIcon } from '@heroicons/vue/24/solid'
+import { ArrowLeftIcon, Squares2X2Icon } from '@heroicons/vue/24/solid'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -8,7 +8,12 @@ const route = useRoute()
 <template>
   <li>
     <RouterLink :to="{ name: 'project', params: route.params }"
-      ><RocketLaunchIcon /> Back</RouterLink
+      ><ArrowLeftIcon /> Back</RouterLink
+    >
+  </li>
+  <li>
+    <RouterLink :to="{ name: 'project-website', params: route.params }"
+      ><Squares2X2Icon /> Builder</RouterLink
     >
   </li>
 </template>

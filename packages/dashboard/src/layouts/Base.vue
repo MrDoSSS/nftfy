@@ -8,9 +8,7 @@ import TheFailedTransactionModal from '@/components/modals/TheFailedTransactionM
 
 const route = useRoute()
 
-const drawerShown = computed<boolean>(
-  () => (route.meta.hasDrawer as boolean) || false
-)
+const drawerShown = computed<boolean>(() => route.meta.hasDrawer || false)
 
 const open = ref(false)
 </script>

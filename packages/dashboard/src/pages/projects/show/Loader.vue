@@ -9,10 +9,10 @@ const router = useRouter()
 
 const project = ref(await projects.get(route.params.id as string))
 
-if (!project.value) {
-  router.replace({ name: 'projects' })
-} else {
+if (project.value) {
   provide(ProjectKey, project.value)
+} else {
+  router.replace({ name: 'projects' })
 }
 </script>
 
